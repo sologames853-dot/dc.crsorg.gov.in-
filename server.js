@@ -133,6 +133,17 @@ app.patch("/api/admins/:id/status", auth, requireRole("SUPER_ADMIN"), async (req
   res.json({ success: true, admin: publicAdmin(admin) });
 });
 
+app.patch("/api/admins/:id/wallet", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  const id = objectId(req.params.id);
+  if (!id) return res.status(404).json({ message: "Admin not found" });
+  const balance = Number(req.body.wallet_balance);
+  if (isNaN(balance)) return res.status(400).json({ message: "Invalid balance value" });
+  const result = await admins.findOneAndUpdate({ _id: id, role: "ADMIN" }, { $set: { wallet_balance: balance } }, { returnDocument: "after" });
+  const admin = result && result.value ? result.value : result;
+  if (!admin) return res.status(404).json({ message: "Admin not found" });
+  res.json({ success: true, admin: publicAdmin(admin) });
+});
+
 app.get("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   let query = {};
   if (req.user.role === "ADMIN") {

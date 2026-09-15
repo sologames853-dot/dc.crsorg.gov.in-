@@ -6,154 +6,237 @@
 <title>Private Birth Record System</title>
 <style>
 *{box-sizing:border-box;}
-body{margin:0;font-family:Arial,sans-serif;background:#eef2f7;color:#1f2937;}
-header{background:#111827;color:white;padding:18px 25px;display:flex;justify-content:space-between;align-items:center;}
-header h1{margin:0;font-size:22px;}
-header span{font-size:13px;opacity:.8;}
-.container{max-width:1200px;margin:30px auto;padding:0 15px;}
-.card{background:white;border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
-.login{max-width:420px;margin:100px auto;}
-input,select,textarea{width:100%;padding:12px;margin-top:7px;margin-bottom:15px;border:1px solid #d1d5db;border-radius:7px;font-size:14px;}
-textarea{min-height:90px;}
-button{border:0;border-radius:7px;padding:11px 18px;cursor:pointer;background:#2563eb;color:white;font-weight:bold;}
-button:hover{opacity:.9;}
-button.danger{background:#dc2626;}
-button.secondary{background:#6b7280;}
-button.success{background:#059669;}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;}
-.stat{background:#fff;padding:20px;border-radius:10px;text-align:center;}
-.stat strong{display:block;font-size:28px;margin-top:5px;}
-table{width:100%;border-collapse:collapse;margin-top:15px;}
-th,td{padding:11px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px;}
-th{background:#f3f4f6;}
-.badge{padding:5px 9px;border-radius:20px;font-size:12px;}
-.active{background:#dcfce7;color:#166534;}
-.disabled{background:#fee2e2;color:#991b1b;}
+body{margin:0;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f0f4f8;color:#1f2937;}
+header{background:#1e293b;color:white;padding:15px 25px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+header h1{margin:0;font-size:22px;font-weight:600;letter-spacing:0.5px;}
+header span{font-size:14px;background:rgba(255,255,255,0.15);padding:6px 12px;border-radius:20px;}
+.container{max-width:1200px;margin:25px auto;padding:0 15px;}
+.card{background:white;border-radius:12px;padding:25px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,0.05);border:1px solid #e2e8f0;}
+.login{max-width:400px;margin:80px auto;}
+.login h2{text-align:center;color:#1e293b;margin-bottom:8px;}
+.login p{text-align:center;color:#64748b;margin-bottom:24px;}
+.whatsapp-btn-container{text-align:center;margin-top:15px;padding-top:15px;border-top:1px solid #e2e8f0;}
+.whatsapp-btn{display:inline-flex;align-items:center;background:#25d366;color:white;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:bold;font-size:14px;transition:opacity 0.2s;}
+.whatsapp-btn:hover{opacity:0.9;}
+input,select,textarea{width:100%;padding:12px 16px;margin-top:6px;margin-bottom:18px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;background:#f8fafc;transition:border 0.2s;}
+input:focus,select:focus,textarea:focus{border-color:#3b82f6;outline:none;background:#ffffff;}
+textarea{min-height:100px;resize:vertical;}
+label{font-size:13px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:0.5px;}
+button{border:0;border-radius:8px;padding:12px 20px;cursor:pointer;background:#2563eb;color:white;font-weight:bold;font-size:14px;transition:all 0.2s;box-shadow:0 2px 5px rgba(37,99,235,0.2);}
+button:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 4px 8px rgba(37,99,235,0.3);}
+button.danger{background:#ef4444;box-shadow:0 2px 5px rgba(239,68,68,0.2);}
+button.danger:hover{background:#dc2626;box-shadow:0 4px 8px rgba(239,68,68,0.3);}
+button.secondary{background:#64748b;box-shadow:0 2px 5px rgba(100,116,139,0.2);}
+button.secondary:hover{background:#475569;box-shadow:0 4px 8px rgba(100,116,139,0.3);}
+button.success{background:#10b981;box-shadow:0 2px 5px rgba(16,185,129,0.2);}
+button.success:hover{background:#059669;box-shadow:0 4px 8px rgba(16,185,129,0.3);}
+button.tab-btn{background:#e2e8f0;color:#334155;box-shadow:none;border-radius:6px;padding:10px 16px;font-size:13px;}
+button.tab-btn:hover{background:#cbd5e1;color:#1e293b;transform:none;}
+button.tab-btn.active-tab{background:#2563eb;color:white;box-shadow:0 2px 5px rgba(37,99,235,0.2);}
+
+.navigation-bar{display:flex;gap:10px;margin-bottom:25px;flex-wrap:wrap;background:white;padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.03);border:1px solid #e2e8f0;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px;}
+.stat{background:#fff;padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.02);border:1px solid #e2e8f0;}
+.stat label{color:#64748b;font-size:12px;}
+.stat strong{display:block;font-size:26px;margin-top:4px;color:#1e293b;}
+table{width:100%;border-collapse:collapse;margin-top:10px;background:white;}
+th,td{padding:14px 16px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:13px;color:#334155;}
+th{background:#f8fafc;font-weight:600;color:#475569;text-transform:uppercase;font-size:11px;letter-spacing:0.5px;}
+tr:hover td{background:#f8fafc;}
+.badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;}
+.badge.active{background:#dcfce7;color:#15803d;}
+.badge.disabled{background:#fee2e2;color:#b91c1c;}
+.badge.pending{background:#fef3c7;color:#d97706;}
+.badge.approved{background:#dcfce7;color:#15803d;}
+.badge.rejected{background:#fee2e2;color:#b91c1c;}
 .hidden{display:none !important;}
-.notice{padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:7px;margin-bottom:15px;}
-.registration{font-weight:bold;font-size:18px;color:#1d4ed8;background:#eff6ff;padding:14px;border-radius:7px;}
-@media(max-width:700px){.grid,.stats{grid-template-columns:1fr;}table{display:block;overflow-x:auto;}}
+.notice{padding:14px;background:#fff7ed;border:1px solid #ffedd5;border-radius:8px;margin-bottom:20px;color:#c2410c;font-size:14px;}
+.registration{font-weight:bold;font-size:18px;color:#1d4ed8;background:#eff6ff;padding:14px;border-radius:8px;border:1px dashed #bfdbfe;margin-bottom:15px;text-align:center;}
+@media(max-width:768px){.grid,.stats{grid-template-columns:1fr;}table{display:block;overflow-x:auto;}.navigation-bar{flex-direction:column;}}
 </style>
 </head>
 <body>
+
 <div id="loginPage" class="login">
 <div class="card">
 <h2>Birth Record System</h2>
-<p>Authorized Login</p>
+<p>Authorized Admin Secure Login</p>
 <input id="username" placeholder="Admin ID" autocomplete="username">
 <input id="password" type="password" placeholder="Password" autocomplete="current-password">
-<button onclick="login()">Login</button>
-<p id="loginMessage"></p>
+<button style="width:100%;" onclick="login()">Login</button>
+<p id="loginMessage" style="color:#ef4444; margin-top:10px; font-weight:500;"></p>
+<div class="whatsapp-btn-container">
+<a href="https://wa.me/916393649484?text=Hello%20Sir,%20I%20want%20to%20create%20an%20Admin%20ID%20for%20Birth%20Record%20System." target="_blank" class="whatsapp-btn">
+<svg style="width:18px;height:18px;margin-right:8px;fill:white;" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.6.95 3.498 1.451 5.438 1.453 5.494 0 9.961-4.47 9.964-9.97.001-2.665-1.033-5.171-2.913-7.054-1.881-1.883-4.385-2.92-7.054-2.922-5.497 0-9.965 4.471-9.968 9.97-.001 1.993.521 3.941 1.512 5.66l-.98 3.58 3.673-.963zm10.702-5.321c-.304-.153-1.8-.886-2.077-.988-.278-.102-.48-.153-.682.153-.202.304-.783.988-.96 1.192-.177.203-.355.228-.659.076-.304-.153-1.283-.473-2.443-1.508-.903-.805-1.512-1.8-1.689-2.105-.177-.304-.019-.468.133-.62.137-.136.304-.355.456-.533.152-.178.203-.304.304-.508.101-.203.051-.381-.025-.533-.076-.153-.682-1.644-.934-2.253-.247-.594-.499-.513-.682-.523-.176-.01-.38-.011-.584-.011-.203 0-.532.076-.811.381-.278.304-1.063 1.041-1.063 2.54 0 1.498 1.089 2.946 1.241 3.149.152.203 2.143 3.272 5.19 4.588.725.313 1.291.5 1.733.64.729.232 1.39.199 1.913.12.583-.088 1.8-.737 2.053-1.448.253-.71.253-1.32.177-1.448-.076-.127-.278-.203-.582-.356z"/></svg>
+Create ID (Contact Admin)
+</a>
 </div>
 </div>
+</div>
+
 <div id="app" class="hidden">
 <header>
-<div><h1>Birth Record System</h1><span>Private Authorized Records System</span></div>
+<div><h1>Birth Record System</h1><span>Private Authorized Secure Management</span></div>
 <div><span id="userInfo"></span>&nbsp;<button class="secondary" onclick="logout()">Logout</button></div>
 </header>
 <div class="container">
-<div class="notice"><b>Important:</b> This is a private authorized record-management system. It is not a government certificate portal.</div>
+<div class="notice"><b>Important Security Alert:</b> This is a private authorized record-management portal. All activities are monitored legally.</div>
+
 <div class="stats">
-<div id="walletStatBox" class="stat">Wallet Balance<strong id="walletBalance">₹0</strong></div>
-<div id="totalCollectionBox" class="stat hidden">Total Collection<strong id="totalCollection">₹0</strong></div>
-<div class="stat">Total Records<strong id="totalRecords">0</strong></div>
-<div class="stat">Male<strong id="maleRecords">0</strong></div>
-<div class="stat">System<strong>ONLINE</strong></div>
+<div id="walletStatBox" class="stat"><label>Wallet Balance</label><strong id="walletBalance">₹0</strong></div>
+<div id="totalCollectionBox" class="stat hidden"><label>Total Approved Collection</label><strong id="totalCollection">₹0</strong></div>
+<div class="stat"><label>Your Created Records</label><strong id="totalRecords">0</strong></div>
+<div class="stat"><label>Male Records</label><strong id="maleRecords">0</strong></div>
+<div class="stat"><label>System Health</label><strong style="color:#10b981;">ONLINE</strong></div>
 </div>
-<div id="adminWalletPanel" class="card hidden">
-<h2>Recharge Wallet</h2>
-<p>Transfer amount to UPI: <b>mrid55638@naviaxis</b></p>
-<div class="grid">
-<div><label>Recharge Amount (₹)</label><input id="rechargeAmount" type="number" placeholder="Enter amount"></div>
-<div><label>Transaction UTR / Ref No.</label><input id="rechargeUTR" placeholder="Enter UTR number"></div>
+
+<!-- Tab Navigation Bar Buttons -->
+<div class="navigation-bar">
+  <button id="tabBtnApply" class="tab-btn active-tab" onclick="switchTab('apply')">Apply Birth Record</button>
+  <button id="tabBtnRecords" class="tab-btn" onclick="switchTab('records')">Birth Record History</button>
+  <button id="tabBtnWallet" class="tab-btn" onclick="switchTab('wallet')">Wallet Amount & History</button>
+  <button id="tabBtnVerification" class="tab-btn" onclick="switchTab('verify')">Verify Certificate</button>
+  <button id="tabBtnSuper" class="tab-btn hidden" onclick="switchTab('super')">Admin Management</button>
 </div>
-<button class="success" onclick="requestWallet()">Submit Recharge Request</button>
-<hr>
-<h3>My Recharge Requests</h3>
-<table>
-<thead><tr><th>Date</th><th>Amount</th><th>UTR</th><th>Status</th></tr></thead>
-<tbody id="myWalletTable"></tbody>
-</table>
-</div>
-<div id="superAdminWalletPanel" class="card hidden">
-<h2>Super Admin — Wallet Approval</h2>
-<table>
-<thead><tr><th>Admin</th><th>Amount</th><th>UTR</th><th>Date</th><th>Action</th></tr></thead>
-<tbody id="walletApprovalTable"></tbody>
-</table>
-</div>
-<div id="superAdminPanel" class="card hidden">
-<h2>Super Admin — Admin Management</h2>
-<p>Super Admin can create Admin IDs and passwords.</p>
-<div class="grid">
-<div><label>Admin ID</label><input id="newAdminUsername" placeholder="Example: admin01"></div>
-<div><label>Admin Password</label><input id="newAdminPassword" type="password" placeholder="Minimum 8 characters"></div>
-</div>
-<label>Admin Name</label><input id="newAdminName" placeholder="Admin full name">
-<button onclick="createAdmin()">Create Admin</button>
-<hr>
-<h3>Admin Users</h3>
-<table>
-<thead><tr><th>ID</th><th>Admin ID</th><th>Name</th><th>Status</th><th>Action</th></tr></thead>
-<tbody id="adminTable"></tbody>
-</table>
-</div>
-<div class="card">
-<h2>Birth Record</h2>
+
+<!-- Tab 1: Apply / Edit Birth Record -->
+<div id="tabViewApply" class="tab-content card">
+<h2 id="formTitle">Apply New Birth Record (Fee: ₹48)</h2>
 <form id="recordForm">
 <input type="hidden" id="recordId">
-<label>Name / नाम</label><input id="name" required>
+<label>Name / नाम</label><input id="name" required placeholder="Enter child full name">
 <div class="grid">
-<div><label>Sex / लिंग</label><select id="sex"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
-<div><label>Date of Birth</label><input id="date_of_birth" type="date"></div>
+<div><label>Sex / लिंग</label><select id="sex" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+<div><label>Date of Birth / जन्म तिथि</label><input id="date_of_birth" type="date" required></div>
 </div>
 <div class="grid">
-<div><label>Child Aadhaar (Optional)</label><input id="child_aadhaar"></div>
-<div><label>Place of Birth</label><input id="place_of_birth"></div>
+<div><label>Child Aadhaar (Optional)</label><input id="child_aadhaar" placeholder="Enter 12 digit Aadhaar"></div>
+<div><label>Place of Birth / जन्म स्थान</label><input id="place_of_birth" required placeholder="Hospital or Address name"></div>
 </div>
 <div class="grid">
-<div><label>Mother Name</label><input id="mother_name"></div>
-<div><label>Mother Aadhaar</label><input id="mother_aadhaar"></div>
+<div><label>Mother Name / माता का नाम</label><input id="mother_name" required placeholder="Enter mother name"></div>
+<div><label>Mother Aadhaar</label><input id="mother_aadhaar" placeholder="Enter mother 12 digit Aadhaar"></div>
 </div>
 <div class="grid">
-<div><label>Father Name</label><input id="father_name"></div>
-<div><label>Father Aadhaar</label><input id="father_aadhaar"></div>
+<div><label>Father Name / पिता का नाम</label><input id="father_name" required placeholder="Enter father name"></div>
+<div><label>Father Aadhaar</label><input id="father_aadhaar" placeholder="Enter father 12 digit Aadhaar"></div>
 </div>
 <div class="grid">
 <div><label>District</label><input id="district" value="FIROZABAD"></div>
 <div><label>State</label><input id="state" value="UTTAR PRADESH"></div>
 </div>
 <label>Registration Number</label><div id="registrationPreview" class="registration">Automatically generated after saving</div>
-<label>Registration Date</label><input id="registration_date" type="date">
-<label>Address at time of Birth</label><textarea id="address"></textarea>
-<label>Permanent Address</label><textarea id="permanent_address"></textarea>
-<button type="submit">Save Birth Record</button>
-<button type="button" class="secondary" onclick="clearForm()">Clear</button>
+<label>Registration Date</label><input id="registration_date" type="date" required>
+<label>Address at time of Birth</label><textarea id="address" placeholder="Complete address at time of child birth"></textarea>
+<label>Permanent Address</label><textarea id="permanent_address" placeholder="Permanent home address"></textarea>
+<button type="submit" class="success">Save & Generate Certificate</button>
+<button type="button" class="secondary" onclick="clearForm()">Clear Form</button>
 </form>
 </div>
-<div class="card">
-<h2>Birth Records</h2>
-<input id="search" placeholder="Search by name or registration number..." oninput="renderRecords()">
-<button onclick="loadRecords()">Refresh</button>
+
+<!-- Tab 2: Birth Record History & Print -->
+<div id="tabViewRecords" class="tab-content card hidden">
+<h2>Birth Records Log & Printing</h2>
+<input id="search" placeholder="Search by name or registration number instantly..." oninput="renderRecords()">
+<button class="secondary" style="margin-bottom:15px;" onclick="loadRecords()">Refresh Log</button>
 <table>
 <thead><tr><th>Name</th><th>DOB</th><th>Registration Number</th><th>Created By</th><th>Action</th></tr></thead>
 <tbody id="recordsTable"></tbody>
 </table>
 </div>
-<div class="card">
-<h2>Record Verification</h2>
-<input id="verifyNumber" placeholder="Enter Registration Number">
-<button onclick="verifyRecord()">Verify</button>
-<div id="verifyResult"></div>
+
+<!-- Tab 3: Wallet Panel (Both Request and Approval view) -->
+<div id="tabViewWallet" class="tab-content hidden">
+  <div id="adminWalletPanel" class="card">
+  <h2>Recharge Wallet Account</h2>
+  <p>Transfer recharge amount to Official UPI ID: <b style="color:#2563eb; font-size:16px;">mrid55638@naviaxis</b></p>
+  <div class="grid">
+  <div><label>Recharge Amount (₹)</label><input id="rechargeAmount" type="number" placeholder="Enter amount paid"></div>
+  <div><label>Transaction UTR / Ref No.</label><input id="rechargeUTR" placeholder="Enter 12 digit UTR number"></div>
+  </div>
+  <button class="success" onclick="requestWallet()">Submit Payment Request</button>
+  <hr style="margin:25px 0; border:0; border-top:1px solid #e2e8f0;">
+  <h3>My Recharge & Transaction History</h3>
+  <table>
+  <thead><tr><th>Date</th><th>Amount</th><th>UTR / Reference</th><th>Status</th></tr></thead>
+  <tbody id="myWalletTable"></tbody>
+  </table>
+  </div>
+
+  <div id="superAdminWalletPanel" class="card hidden">
+  <h2>Super Admin — Wallet Recharge Requests & Fast Update</h2>
+  <table>
+  <thead><tr><th>Admin Username</th><th>Amount</th><th>UTR No.</th><th>Date Requested</th><th>Action</th></tr></thead>
+  <tbody id="walletApprovalTable"></tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Tab 4: Instant Verification Preview -->
+<div id="tabViewVerify" class="tab-content card hidden">
+<h2>Quick Live Certificate Verification</h2>
+<p style="color:#64748b;">Verify the generated registration numbers below.</p>
+<input id="verifyNumber" placeholder="Enter Registration Number (e.g. B2026...)">
+<button onclick="verifyRecord()" class="success">Verify Live Database</button>
+<div id="verifyResult" style="margin-top:20px;"></div>
+</div>
+
+<!-- Tab 5: Super Admin Panel -->
+<div id="tabViewSuper" class="tab-content hidden">
+  <div class="card">
+  <h2>Super Admin — Admin User Management</h2>
+  <p>Create new sub-admins with dedicated wallets.</p>
+  <div class="grid">
+  <div><label>Admin ID / Username</label><input id="newAdminUsername" placeholder="Example: admin01"></div>
+  <div><label>Admin Secure Password</label><input id="newAdminPassword" type="password" placeholder="Minimum 8 characters"></div>
+  </div>
+  <label>Admin Full Name</label><input id="newAdminName" placeholder="Admin display name">
+  <button onclick="createAdmin()">Create Secure Admin</button>
+  </div>
+
+  <div class="card">
+  <h2>All System Users & Balance Quick Adjust</h2>
+  <table>
+  <thead><tr><th>Admin ID</th><th>Full Name</th><th>Wallet Balance</th><th>Status</th><th>Action / Manual Adjust</th></tr></thead>
+  <tbody id="adminTable"></tbody>
+  </table>
+  </div>
+</div>
+
 </div>
 </div>
-</div>
+
 <script>
 console.log("Script loading...");
 let token=localStorage.getItem("birth_token");
 let currentUser=null;
 let records=[];
+
+function switchTab(tabId) {
+  // Hide all contents
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.navigation-bar .tab-btn').forEach(el => el.classList.remove('active-tab'));
+
+  // Show target content
+  if(tabId === 'apply') {
+    document.getElementById('tabViewApply').classList.remove('hidden');
+    document.getElementById('tabBtnApply').classList.add('active-tab');
+  } else if(tabId === 'records') {
+    document.getElementById('tabViewRecords').classList.remove('hidden');
+    document.getElementById('tabBtnRecords').classList.add('active-tab');
+  } else if(tabId === 'wallet') {
+    document.getElementById('tabViewWallet').classList.remove('hidden');
+    document.getElementById('tabBtnWallet').classList.add('active-tab');
+  } else if(tabId === 'verify') {
+    document.getElementById('tabViewVerify').classList.remove('hidden');
+    document.getElementById('tabBtnVerification').classList.add('active-tab');
+  } else if(tabId === 'super') {
+    document.getElementById('tabViewSuper').classList.remove('hidden');
+    document.getElementById('tabBtnSuper').classList.add('active-tab');
+  }
+}
+
 async function api(url,options={}){
 options.headers={...(options.headers||{}),"Content-Type":"application/json",...(token?{"Authorization":"Bearer "+token}:{})};
 const response=await fetch(url,options);
@@ -161,6 +244,7 @@ const data=await response.json();
 if(!response.ok){throw new Error(data.message||"Request failed");}
 return data;
 }
+
 async function login(){
 const username=document.getElementById("username").value.trim();
 const password=document.getElementById("password").value;
@@ -174,29 +258,33 @@ localStorage.setItem("birth_token",token);
 showApp();
 }catch(error){message.textContent=error.message;}
 }
+
 function showApp(){
 document.getElementById("loginPage").classList.add("hidden");
 document.getElementById("app").classList.remove("hidden");
 document.getElementById("userInfo").textContent=(currentUser.full_name||currentUser.username)+" ("+currentUser.role+")";
+
 if(currentUser.role==="SUPER_ADMIN"){
-  document.getElementById("superAdminPanel").classList.remove("hidden");
+  document.getElementById("tabBtnSuper").classList.remove("hidden");
   document.getElementById("superAdminWalletPanel").classList.remove("hidden");
-  document.getElementById("adminWalletPanel").classList.add("hidden");
   document.getElementById("walletStatBox").classList.add("hidden");
   document.getElementById("totalCollectionBox").classList.remove("hidden");
   loadAdmins();
   loadWalletRequests();
+  switchTab('super');
 } else {
-  document.getElementById("superAdminPanel").classList.add("hidden");
+  document.getElementById("tabBtnSuper").classList.add("hidden");
   document.getElementById("superAdminWalletPanel").classList.add("hidden");
-  document.getElementById("adminWalletPanel").classList.remove("hidden");
   document.getElementById("walletStatBox").classList.remove("hidden");
   document.getElementById("totalCollectionBox").classList.add("hidden");
   loadMyWalletRequests();
+  switchTab('apply');
 }
 loadRecords();
 }
+
 function logout(){localStorage.removeItem("birth_token");token=null;currentUser=null;location.reload();}
+
 async function loadRecords(){
   try {
     if(currentUser && currentUser.role==="ADMIN"){
@@ -208,6 +296,7 @@ async function loadRecords(){
     updateStats();
   } catch(error){alert(error.message);}
 }
+
 function updateStats(){
 if(currentUser.role==="ADMIN"){
   document.getElementById("walletBalance").textContent="₹"+(currentUser.wallet_balance||0);
@@ -215,6 +304,7 @@ if(currentUser.role==="ADMIN"){
 document.getElementById("totalRecords").textContent=records.length;
 document.getElementById("maleRecords").textContent=records.filter(r=>r.sex==="Male").length;
 }
+
 function renderRecords(){
 const search=document.getElementById("search").value.toLowerCase();
 const table=document.getElementById("recordsTable");
@@ -222,10 +312,11 @@ table.innerHTML="";
 records.filter(r=>String(r.name).toLowerCase().includes(search)||String(r.registration_number).toLowerCase().includes(search))
 .forEach(record=>{
 const row=document.createElement("tr");
-row.innerHTML="<td>"+escapeHTML(record.name)+"</td><td>"+escapeHTML(record.date_of_birth||"")+"</td><td><b>"+escapeHTML(record.registration_number)+"</b></td><td>"+escapeHTML(record.created_by_username||"")+"</td><td><button onclick=\"editRecord('"+record.id+"')\">Edit</button><button class=\"danger\" onclick=\"deleteRecord('"+record.id+"')\">Delete</button><button class=\"success\" onclick=\"printRecord('"+record.id+"')\">Print</button></td>";
+row.innerHTML="<td>"+escapeHTML(record.name)+"</td><td>"+escapeHTML(record.date_of_birth||"")+"</td><td><b>"+escapeHTML(record.registration_number)+"</b></td><td>"+escapeHTML(record.created_by_username||"")+"</td><td><button style='padding:6px 12px; margin-right:4px;' onclick=\"editRecord('"+record.id+"')\">Edit</button><button class=\"danger\" style='padding:6px 12px; margin-right:4px;' onclick=\"deleteRecord('"+record.id+"')\">Delete</button><button class=\"success\" style='padding:6px 12px;' onclick=\"printRecord('"+record.id+"')\">Print</button></td>";
 table.appendChild(row);
 });
 }
+
 document.getElementById("recordForm").addEventListener("submit",async function(event){
 event.preventDefault();
 const id=document.getElementById("recordId").value;
@@ -241,10 +332,12 @@ district:document.getElementById("district").value,state:document.getElementById
 try{
 let result;
 if(id){result=await api("/api/records/"+id,{method:"PUT",body:JSON.stringify(data)});alert("Birth record updated successfully.");}
-else{result=await api("/api/records",{method:"POST",body:JSON.stringify(data)});alert("Birth record created.\n\nRegistration Number:\n"+result.record.registration_number);}
+else{result=await api("/api/records",{method:"POST",body:JSON.stringify({data});result=await api("/api/records",{method:"POST",body:JSON.stringify(data)});alert("Birth record created.\n\nRegistration Number:\n"+result.record.registration_number);}
 clearForm();await loadRecords();
+if(currentUser.role==="ADMIN") { showApp(); }
 }catch(error){alert(error.message);}
 });
+
 function editRecord(id){
 const record=records.find(r=>String(r.id)===String(id));
 if(!record)return;
@@ -264,20 +357,25 @@ document.getElementById("permanent_address").value=record.permanent_address||"";
 document.getElementById("district").value=record.district||"FIROZABAD";
 document.getElementById("state").value=record.state||"UTTAR PRADESH";
 document.getElementById("registrationPreview").textContent=record.registration_number;
-window.scrollTo({top:0,behavior:"smooth"});
+document.getElementById("formTitle").textContent = "Edit Birth Record";
+switchTab('apply');
 }
+
 function clearForm(){
 document.getElementById("recordForm").reset();
 document.getElementById("recordId").value="";
 document.getElementById("registrationPreview").textContent="Automatically generated after saving";
 document.getElementById("district").value="FIROZABAD";
 document.getElementById("state").value="UTTAR PRADESH";
+document.getElementById("formTitle").textContent = "Apply New Birth Record (Fee: ₹48)";
 }
+
 async function deleteRecord(id){
 if(!confirm("Delete this birth record?"))return;
 try{await api("/api/records/"+id,{method:"DELETE"});await loadRecords();}
 catch(error){alert(error.message);}
 }
+
 async function createAdmin(){
 const username=document.getElementById("newAdminUsername").value.trim();
 const password=document.getElementById("newAdminPassword").value;
@@ -290,6 +388,7 @@ document.getElementById("newAdminUsername").value="";document.getElementById("ne
 loadAdmins();
 }catch(error){alert(error.message);}
 }
+
 async function loadAdmins(){
 try{
 const admins=await api("/api/admins");
@@ -297,11 +396,23 @@ const table=document.getElementById("adminTable");
 table.innerHTML="";
 admins.forEach(admin=>{
 const row=document.createElement("tr");
-row.innerHTML="<td>"+admin.id+"</td><td><b>"+escapeHTML(admin.username)+"</b></td><td>"+escapeHTML(admin.full_name||"")+"</td><td><span class=\"badge "+(admin.active?"active":"disabled")+"\">"+(admin.active?"ACTIVE":"DISABLED")+"</span></td><td>"+(admin.role==="ADMIN"?"<button onclick=\"toggleAdmin('"+admin.id+"',"+admin.active+")\">"+(admin.active?"Disable":"Enable")+"</button>":"<b>SUPER ADMIN</b>")+"</td>";
+row.innerHTML="<td><b>"+escapeHTML(admin.username)+"</b></td><td>"+escapeHTML(admin.full_name||"")+"</td><td><b style='color:#1e3a8a;'>₹"+(admin.wallet_balance||0)+"</b></td><td><span class=\"badge "+(admin.active?"active":"disabled")+"\">"+(admin.active?"ACTIVE":"DISABLED")+"</span></td><td>"+(admin.role==="ADMIN"?"<input type='number' style='width:90px; padding:6px; margin:0 5px 0 0; display:inline-block;' id='directWallet_"+admin.id+"' value='"+(admin.wallet_balance||0)+"'><button style='padding:6px 10px; margin-right:5px;' class='success' onclick='updateDirectWallet(\""+admin.id+"\")'>Set Balance</button><button class='secondary' style='padding:6px 10px;' onclick=\"toggleAdmin('"+admin.id+"',"+admin.active+")\">"+(admin.active?"Disable":"Enable")+"</button>":"<b>SUPER ADMIN</b>")+"</td>";
 table.appendChild(row);
 });
 }catch(error){alert(error.message);}
 }
+
+async function updateDirectWallet(id) {
+  const amountInput = document.getElementById("directWallet_"+id);
+  const balance = Number(amountInput.value);
+  if(isNaN(balance) || balance < 0) { alert("Please enter a valid amount."); return; }
+  try {
+    const data = await api("/api/admins/"+id+"/wallet", { method: "PATCH", body: JSON.stringify({ wallet_balance: balance }) });
+    alert("Wallet balance updated successfully to ₹" + balance);
+    loadAdmins();
+  } catch(error) { alert(error.message); }
+}
+
 async function toggleAdmin(id,currentStatus){try{await api("/api/admins/"+id+"/status",{method:"PATCH",body:JSON.stringify({active:!currentStatus})});loadAdmins();}catch(error){alert(error.message);}}
 
 // Wallet Frontend Scripting
