@@ -316,19 +316,10 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
     </style>
 </head>
 <body>
-    <!-- Top Blue Header mimicking Application Navigation Bar -->
-    <div class="header">
-        <div class="header-title">
-            <div class="tick-icon">&#10003;</div>
-            <span>Validate Certificate | Civil R...</span>
-        </div>
-        <div class="header-refresh" onclick="location.reload()">&#8635;</div>
-    </div>
-
     <!-- Government Portal Brand Sub-Header with Indian Flag Gradient and Icons -->
     <div class="gov-banner">
-        <img src="https://crsorgi.gov.in/web/images/logo.png" class="left-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg'">
-        <img src="https://amritmahotsav.nic.in/assets/images/logo.png" class="center-logo" onerror="this.style.display='none'">
+        <img src="/image/crs_logo.png" class="left-logo" onerror="this.src='https://crsorgi.gov.in/web/images/logo.png'">
+        <img src="/image/amrit_logo.png" class="center-logo" onerror="this.src='https://amritmahotsav.nic.in/assets/images/logo.png'">
         <div class="right-icons">
             <span class="moon-icon">&#9789;</span>
             <a href="#" class="login-btn">&#8594;</a>
@@ -402,24 +393,24 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
             </div>
 
             <div class="pm-india-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem">
+                <img src="/image/emblem.png" alt="Emblem" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg'">
                 <span>PM INDIA</span>
             </div>
 
             <div class="generic-img-wrapper">
-                <img src="https://www.makeinindia.com/mfg_theme/images/logo.png" alt="Make In India">
+                <img src="/image/makeinindia.png" alt="Make In India" onerror="this.src='https://www.makeinindia.com/mfg_theme/images/logo.png'">
             </div>
 
             <div class="generic-img-wrapper">
-                <img src="https://upload.wikimedia.org/wikipedia/hi/thumb/c/c5/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png" alt="Digital India">
+                <img src="/image/digitalindia.png" alt="Digital India" onerror="this.src='https://upload.wikimedia.org/wikipedia/hi/thumb/c/c5/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png'">
             </div>
 
             <div class="generic-img-wrapper">
-                <img src="https://www.mygov.in/sites/default/files/mygov_logo_new.png" alt="MyGov">
+                <img src="/image/mygov.png" alt="MyGov" onerror="this.src='https://www.mygov.in/sites/default/files/mygov_logo_new.png'">
             </div>
 
             <div class="coop-wrapper">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/International_Year_of_Cooperatives_2012_logo.svg/1200px-International_Year_of_Cooperatives_2012_logo.svg.png" alt="Coop Logo" onerror="this.style.opacity='0.5'">
+                <img src="/image/coop.png" alt="Coop Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/International_Year_of_Cooperatives_2012_logo.svg/1200px-International_Year_of_Cooperatives_2012_logo.svg.png'">
                 <div class="coop-title">International Year of Cooperatives 2025</div>
                 <div class="coop-sub">Cooperatives Build a Better World</div>
             </div>
