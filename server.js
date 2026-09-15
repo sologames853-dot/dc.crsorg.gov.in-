@@ -341,7 +341,7 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
                     <td class="value">${record.sex || 'Male'}</td>
                 </tr>
                 <tr>
-                    <td class="label">DOD</td>
+                    <td class="label">Date of Birth</td>
                     <td class="value">${formattedDOB}</td>
                 </tr>
                 <tr>
@@ -353,11 +353,8 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
                     <td class="value">${record.father_name || 'N/A'}</td>
                 </tr>
                 <tr>
-                    <td class="label">Place of Death</td>
-                    <td class="value">
-                        LADPURA, NAGLA DUNGAR, FIROZABAD, FIROZABAD, UTTAR PRADESH, 283203 / <br>
-                        लदपुरा, NAGLA DUNGAR, FIROZABAD, FIROZABAD, UTTAR PRADESH, 283203
-                    </td>
+                    <td class="label">Place of Birth</td>
+                    <td class="value">${record.place_of_birth || 'N/A'}</td>
                 </tr>
                 <tr>
                     <td class="label">Registration Date</td>
@@ -365,11 +362,11 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
                 </tr>
                 <tr>
                     <td class="label">Registration Unit Name</td>
-                    <td class="value">GRAMA PANCHAYAT NAGLA DUNGAR</td>
+                    <td class="value">NAGAR NIGAM ${record.district || 'FIROZABAD'}</td>
                 </tr>
                 <tr>
                     <td class="label">Registration Unit Code</td>
-                    <td class="value">09457</td>
+                    <td class="value">0${Math.floor(10000 + Math.random() * 90000)}</td>
                 </tr>
             </table>
         </div>
