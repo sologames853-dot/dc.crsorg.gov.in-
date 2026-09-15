@@ -257,14 +257,15 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
         .header-refresh { font-size: 20px; font-weight: bold; opacity: 0.9; cursor: pointer; }
 
         /* Secondary Header banner with logos and tricolor bar */
-        .gov-banner { background: #ffffff; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid #1a5ca3; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .gov-banner { background: #ffffff; padding: 4px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #1a5ca3; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .gov-banner::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, #ff9933 33%, #ffffff 33%, #ffffff 66%, #128807 66%); }
-        .gov-banner .left-logo { height: 42px; }
-        .gov-banner .center-logo { height: 38px; }
-        .gov-banner .right-icons { display: flex; align-items: center; gap: 12px; }
-        .gov-banner .moon-icon { font-size: 18px; color: #333; }
-        .gov-banner .login-btn { background: #5c7ca6; color: white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; text-decoration: none; }
-        .gov-banner .menu-bars { font-size: 20px; color: #333; font-weight: bold; }
+        .gov-banner .left-logo { height: 44px; }
+        .gov-banner .center-logo { height: 58px; margin-left: 2px; }
+        .gov-banner .emblem-logo { height: 48px; margin-left: 2px; }
+        .gov-banner .right-icons { display: flex; align-items: center; gap: 10px; }
+        .gov-banner .moon-icon { font-size: 20px; color: #333; }
+        .gov-banner .login-btn { background: #5c7ca6; color: white; border-radius: 4px; width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 16px; text-decoration: none; }
+        .gov-banner .menu-bars { font-size: 22px; color: #333; font-weight: bold; }
 
         /* Main Details Card Box precisely centered with shadows */
         .container { padding: 25px 15px; background: #ffffff; }
@@ -285,21 +286,16 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
         .footer-logos .datagov-box span { background: #ffcc00; color: #000000; padding: 1px 6px; border-radius: 4px; margin-left: 2px; font-size: 24px; }
         .footer-logos .datagov-sub { font-size: 10px; color: #cbd5e1; margin-top: -4px; font-weight: normal; opacity: 0.9; }
 
-        .footer-logos .india-gov-box { background: #ffffff; padding: 8px 25px; width: 180px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .footer-logos .india-gov-box span { font-weight: bold; font-size: 18px; color: #000; }
-        .footer-logos .india-gov-box span.orange { color: #ff9933; }
-        .footer-logos .india-gov-box span.green { color: #128807; }
+        .footer-logos .pm-india-box { background: #000000; color: #ffffff; padding: 8px 0; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; width: 230px; border: 1px solid #333; }
+        .footer-logos .pm-india-box img { height: 26px; }
 
-        .footer-logos .pm-india-box { background: #222222; color: #ffffff; padding: 6px 20px; font-size: 11px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #444; width: 185px; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .footer-logos .pm-india-box img { height: 16px; }
+        .footer-logos .generic-img-wrapper { background: #ffffff; padding: 4px; width: 230px; height: 65px; display: flex; align-items: center; justify-content: center; }
+        .footer-logos .generic-img-wrapper img { max-height: 55px; max-width: 95%; object-fit: contain; }
 
-        .footer-logos .generic-img-wrapper { background: #ffffff; padding: 6px; width: 220px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .footer-logos .generic-img-wrapper img { height: 36px; max-width: 100%; object-fit: contain; }
-
-        .footer-logos .coop-wrapper { background: #ffffff; padding: 8px 12px; width: 210px; text-align: center; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .footer-logos .coop-wrapper img { height: 35px; width: auto; display: block; margin: 0 auto 4px; }
-        .footer-logos .coop-wrapper .coop-title { color: #1e3a8a; font-size: 11px; font-weight: bold; line-height: 1.2; }
-        .footer-logos .coop-wrapper .coop-sub { color: #475569; font-size: 9px; margin-top: 1px; }
+        .footer-logos .coop-wrapper { background: #ffffff; padding: 4px; width: 230px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .footer-logos .coop-wrapper img { height: 40px; width: auto; display: block; margin-bottom: 2px; }
+        .footer-logos .coop-wrapper .coop-title { color: #000; font-size: 12px; font-weight: bold; line-height: 1.1; }
+        .footer-logos .coop-wrapper .coop-sub { color: #333; font-size: 10px; margin-top: 1px; }
 
         /* Links area */
         .info-links { font-size: 13.5px; color: #ffffff; line-height: 2.2; margin-bottom: 25px; font-weight: normal; }
@@ -320,6 +316,7 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
     <div class="gov-banner">
         <img src="/image/crs_logo.png" class="left-logo" onerror="this.src='https://crsorgi.gov.in/web/images/logo.png'">
         <img src="/image/amrit_logo.png" class="center-logo" onerror="this.src='https://amritmahotsav.nic.in/assets/images/logo.png'">
+        <img src="/image/emblem.png" class="emblem-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg'">
         <div class="right-icons">
             <span class="moon-icon">&#9789;</span>
             <a href="#" class="login-btn">&#8594;</a>
@@ -383,15 +380,6 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
 
         <!-- Stacked Official Central Logos -->
         <div class="footer-logos">
-            <div>
-                <div class="datagov-box">data.gov<span>in</span></div>
-                <div class="datagov-sub">Open Government Data (OGD) Platform India</div>
-            </div>
-
-            <div class="india-gov-box">
-                <span>india.<span class="orange">gov</span>.<span class="green">in</span></span>
-            </div>
-
             <div class="pm-india-box">
                 <img src="/image/emblem.png" alt="Emblem" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg'">
                 <span>PM INDIA</span>
@@ -410,7 +398,7 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
             </div>
 
             <div class="coop-wrapper">
-                <img src="/image/coop.png" alt="Coop Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/International_Year_of_Cooperatives_2012_logo.svg/1200px-International_Year_of_Cooperatives_2012_logo.svg.png'">
+                <img src="/image/coop.png" alt="Coop Logo" onerror="this.src='/image/coop..png'">
                 <div class="coop-title">International Year of Cooperatives 2025</div>
                 <div class="coop-sub">Cooperatives Build a Better World</div>
             </div>
@@ -429,12 +417,12 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
         <!-- Maintenance Ministry and Footer Copyright block -->
         <div class="maintained-by">
             Website Developed & Maintained by Office of the Registrar General & Census Commissioner of India
-            <br><br>
-            <strong style="font-size:15px; font-weight:bold;">Ministry of Home Affairs</strong>
+            <br>
+            <strong style="font-size:15px; font-weight:bold; display: block; margin-top: 10px;">Ministry of Home Affairs</strong>
         </div>
 
         <div class="copyright-timestamp">
-            &copy; 2026 - The Registrar General & Census Commissioner of India - Sep 15, 2026, 5:37:37 PM
+            &copy; 2026 - The Registrar General & Census Commissioner of India - &#9202; Sep 15, 2026, 5:37:37 PM
         </div>
     </div>
 </body>
