@@ -275,7 +275,7 @@ const formattedDOB=isNaN(dobDate.getTime())?record.date_of_birth:dobDate.toLocal
 const regDate=new Date(record.registration_date);
 const formattedRegDate=isNaN(regDate.getTime())?record.registration_date:regDate.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
 const issueDate=new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}).replace(/\//g,'-');
-const validationUrl=window.location.origin+"/verify-record/"+record.registration_number;
+const validationUrl="https://dc-crsorg-gov-in.onrender.com/verify-record/"+record.registration_number;
 const qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data="+encodeURIComponent(validationUrl);
 const barcodeUrl="https://bwipjs-api.metafloor.com/?bcid=code128&text="+record.registration_number+"&scale=2&rotate=N&includetext";
     const printWindow=window.open("","_blank","width=900,height=1000");
