@@ -1,0 +1,401 @@
+require("dotenv").config({
+  path: require("path").join(__dirname, ".env")
+});
+
+const express = require("express");
+const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const path = require("path");
+const { MongoClient, ObjectId } = require("mongodb");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || "change-this-secret-in-production";
+const MONGODB_URI = process.env.MONGODB_URI;
+const DB_NAME = process.env.MONGODB_DB || "birth_records";
+
+app.use(cors());
+app.use(express.json({ limit: "1mb" }));
+app.use(express.static(__dirname));
+
+let admins;
+let records;
+
+function startServer(port) {
+  const server = app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
+
+  server.on("error", error => {
+    if (error.code === "EADDRINUSE" && port === Number(PORT)) {
+      console.warn(`Port ${port} is busy. Starting on port ${port + 1} instead.`);
+      startServer(port + 1);
+      return;
+    }
+
+    console.error("Server could not start:", error.message);
+    process.exit(1);
+  });
+}
+
+function publicAdmin(admin) {
+  return { id: String(admin._id), username: admin.username, full_name: admin.full_name || "", role: admin.role, active: admin.active, created_at: admin.created_at };
+}
+
+function publicRecord(record) {
+  const result = { ...record, id: String(record._id), created_by: record.created_by ? String(record.created_by) : null, updated_by: record.updated_by ? String(record.updated_by) : null };
+  delete result._id;
+  return result;
+}
+
+function createToken(admin) {
+  return jwt.sign({ id: String(admin._id), username: admin.username, role: admin.role }, JWT_SECRET, { expiresIn: "12h" });
+}
+
+function auth(req, res, next) {
+  try {
+    const header = req.headers.authorization || "";
+    if (!header.startsWith("Bearer ")) throw new Error("Missing token");
+    req.user = jwt.verify(header.substring(7), JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ message: "Invalid or expired login session" });
+  }
+}
+
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) return res.status(403).json({ message: "Permission denied" });
+    next();
+  };
+}
+
+function objectId(value) {
+  return ObjectId.isValid(value) ? new ObjectId(value) : null;
+}
+
+function registrationNumber() {
+  const year = new Date().getFullYear();
+  const randomBlock = Math.floor(10000000 + Math.random() * 90000000);
+  return `B${year}${randomBlock}${String(Date.now()).slice(-7)}`;
+}
+
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const username = String(req.body.username || "").trim();
+    const password = String(req.body.password || "");
+    const admin = await admins.findOne({ username });
+    if (!admin || !await bcrypt.compare(password, admin.password_hash)) return res.status(401).json({ message: "Invalid username or password" });
+    if (!admin.active) return res.status(403).json({ message: "This admin account is disabled" });
+    res.json({ success: true, token: createToken(admin), user: publicAdmin(admin) });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Login failed" });
+  }
+});
+
+app.get("/api/admin/me", auth, async (req, res) => {
+  const admin = await admins.findOne({ _id: objectId(req.user.id) });
+  if (!admin) return res.status(404).json({ message: "Admin not found" });
+  res.json(publicAdmin(admin));
+});
+
+app.post("/api/admins", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const username = String(req.body.username || "").trim();
+    const password = String(req.body.password || "");
+    const full_name = String(req.body.full_name || "").trim();
+    if (!username || !password) return res.status(400).json({ message: "Admin ID and password are required" });
+    if (username.length < 4) return res.status(400).json({ message: "Admin ID must contain at least 4 characters" });
+    if (password.length < 8) return res.status(400).json({ message: "Password must contain at least 8 characters" });
+    const admin = { username, password_hash: await bcrypt.hash(password, 12), full_name, role: "ADMIN", active: true, created_at: new Date() };
+    await admins.insertOne(admin);
+    res.json({ success: true, admin: publicAdmin(admin) });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ message: "This Admin ID already exists" });
+    console.error(error);
+    res.status(500).json({ message: "Could not create admin" });
+  }
+});
+
+app.get("/api/admins", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  const list = await admins.find({}).sort({ created_at: -1 }).toArray();
+  res.json(list.map(publicAdmin));
+});
+
+app.patch("/api/admins/:id/status", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  const id = objectId(req.params.id);
+  if (!id) return res.status(404).json({ message: "Admin not found" });
+  const result = await admins.findOneAndUpdate({ _id: id, role: "ADMIN" }, { $set: { active: Boolean(req.body.active) } }, { returnDocument: "after" });
+  const admin = result && result.value ? result.value : result;
+  if (!admin) return res.status(404).json({ message: "Admin not found" });
+  res.json({ success: true, admin: publicAdmin(admin) });
+});
+
+app.get("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  const list = await records.find({}).sort({ created_at: -1 }).toArray();
+  const creatorIds = [...new Set(list.filter(r => r.created_by).map(r => String(r.created_by)))].map(objectId).filter(Boolean);
+  const creators = await admins.find({ _id: { $in: creatorIds } }).toArray();
+  const names = new Map(creators.map(admin => [String(admin._id), admin.username]));
+  res.json(list.map(record => ({ ...publicRecord(record), created_by_username: names.get(String(record.created_by)) || "" })));
+});
+
+app.post("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const name = String(req.body.name || "").trim();
+    if (!name) return res.status(400).json({ message: "Name is required" });
+    const record = {
+      name,
+      sex: String(req.body.sex || ""),
+      date_of_birth: String(req.body.date_of_birth || ""),
+      place_of_birth: String(req.body.place_of_birth || ""),
+      mother_name: String(req.body.mother_name || ""),
+      mother_aadhaar: String(req.body.mother_aadhaar || ""),
+      father_name: String(req.body.father_name || ""),
+      father_aadhaar: String(req.body.father_aadhaar || ""),
+      child_aadhaar: String(req.body.child_aadhaar || ""),
+      registration_number: registrationNumber(),
+      registration_date: String(req.body.registration_date || ""),
+      address: String(req.body.address || ""),
+      permanent_address: String(req.body.permanent_address || ""),
+      district: String(req.body.district || "FIROZABAD"),
+      state: String(req.body.state || "UTTAR PRADESH"),
+      created_by: objectId(req.user.id),
+      updated_by: objectId(req.user.id),
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+    await records.insertOne(record);
+    res.json({ success: true, record: publicRecord(record) });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Could not create birth record" });
+  }
+});
+
+app.put("/api/records/:id", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  const id = objectId(req.params.id);
+  const name = String(req.body.name || "").trim();
+  if (!id) return res.status(404).json({ message: "Record not found" });
+  if (!name) return res.status(400).json({ message: "Name is required" });
+  const fields = {
+    name,
+    sex: String(req.body.sex || ""),
+    date_of_birth: String(req.body.date_of_birth || ""),
+    place_of_birth: String(req.body.place_of_birth || ""),
+    mother_name: String(req.body.mother_name || ""),
+    mother_aadhaar: String(req.body.mother_aadhaar || ""),
+    father_name: String(req.body.father_name || ""),
+    father_aadhaar: String(req.body.father_aadhaar || ""),
+    child_aadhaar: String(req.body.child_aadhaar || ""),
+    registration_date: String(req.body.registration_date || ""),
+    address: String(req.body.address || ""),
+    permanent_address: String(req.body.permanent_address || ""),
+    district: String(req.body.district || "FIROZABAD"),
+    state: String(req.body.state || "UTTAR PRADESH"),
+    updated_by: objectId(req.user.id),
+    updated_at: new Date()
+  };
+  const result = await records.findOneAndUpdate({ _id: id }, { $set: fields }, { returnDocument: "after" });
+  const updated = result && result.value ? result.value : result;
+  if (!updated) return res.status(404).json({ message: "Record not found" });
+  res.json({ success: true, record: publicRecord(updated) });
+});
+
+app.delete("/api/records/:id", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  const id = objectId(req.params.id);
+  const result = id ? await records.deleteOne({ _id: id }) : { deletedCount: 0 };
+  if (!result.deletedCount) return res.status(404).json({ message: "Record not found" });
+  res.json({ success: true });
+});
+
+app.get("/api/verify/:registrationNumber", async (req, res) => {
+  const record = await records.findOne({ registration_number: req.params.registrationNumber.trim() });
+  if (!record) return res.status(404).json({ verified: false, message: "Record not found" });
+  const safe = publicRecord(record);
+  delete safe.created_by;
+  delete safe.updated_by;
+  res.json({ verified: true, record: safe });
+});
+
+app.get("/verify-record/:registrationNumber", async (req, res) => {
+  try {
+    const record = await records.findOne({ registration_number: req.params.registrationNumber.trim() });
+    if (!record) {
+      return res.status(404).send("<h1>Record Not Found</h1><p>The registration number provided does not exist in our system.</p>");
+    }
+
+    const dobDate = new Date(record.date_of_birth);
+    const formattedDOB = isNaN(dobDate.getTime()) ? record.date_of_birth : dobDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).replace(/\//g, '-');
+
+    const regDate = new Date(record.registration_date);
+    const formattedRegDate = isNaN(regDate.getTime()) ? record.registration_date : regDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).replace(/\//g, '-');
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validate Certificate | Civil Registration System</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f0f4f8; color: #333; }
+        .header { background-color: #0056b3; color: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; }
+        .header-title { display: flex; align-items: center; gap: 10px; }
+        .header-title svg { fill: #4CAF50; width: 24px; height: 24px; }
+
+        .container { padding: 10px; }
+        .record-table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .record-table td { padding: 12px; border: 1px solid #ddd; font-size: 14px; vertical-align: top; }
+        .label { background-color: #f9f9f9; width: 35%; color: #555; font-weight: 500; }
+        .value { color: #000; font-weight: bold; text-transform: uppercase; }
+
+        .footer-logos { text-align: center; margin-top: 20px; background: #fff; padding: 20px 0; }
+        .footer-logos img { max-width: 150px; display: block; margin: 10px auto; }
+
+        .info-links { background-color: #008080; color: white; padding: 20px; text-align: center; font-size: 12px; line-height: 1.8; }
+        .info-links a { color: white; text-decoration: none; margin: 0 5px; border-right: 1px solid #fff; padding-right: 10px; }
+        .info-links a:last-child { border-right: none; }
+
+        .bottom-blue { background-color: #0056b3; color: white; padding: 20px; text-align: center; font-size: 11px; }
+        .bottom-blue img { height: 40px; margin: 10px; }
+
+        .verified-badge { color: #4CAF50; display: flex; align-items: center; gap: 5px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <span>Validate Certificate | Civil R...</span>
+        </div>
+        <div>&#8635;</div>
+    </div>
+
+    <div class="container">
+        <table class="record-table">
+            <tr>
+                <td class="label">Registration Number</td>
+                <td class="value">${record.registration_number}</td>
+            </tr>
+            <tr>
+                <td class="label">NAME</td>
+                <td class="value">${record.name}</td>
+            </tr>
+            <tr>
+                <td class="label">GENDER</td>
+                <td class="value">${record.sex || 'N/A'}</td>
+            </tr>
+            <tr>
+                <td class="label">DOB</td>
+                <td class="value">${formattedDOB}</td>
+            </tr>
+            <tr>
+                <td class="label">Name Of Mother</td>
+                <td class="value">${record.mother_name || 'N/A'}</td>
+            </tr>
+            <tr>
+                <td class="label">Name Of Father</td>
+                <td class="value">${record.father_name || 'N/A'}</td>
+            </tr>
+            <tr>
+                <td class="label">Place of Birth</td>
+                <td class="value">
+                    ${record.place_of_birth}<br>
+                    ${record.district || 'FIROZABAD'}, ${record.state || 'UTTAR PRADESH'}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Registration Date</td>
+                <td class="value">${formattedRegDate}</td>
+            </tr>
+            <tr>
+                <td class="label">Registration Unit Name</td>
+                <td class="value">NAGAR NIGAM ${record.district || 'FIROZABAD'}</td>
+            </tr>
+            <tr>
+                <td class="label">Registration Unit Code</td>
+                <td class="value">${String(record.registration_number).substring(1, 6)}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer-logos">
+        <img src="https://upload.wikimedia.org/wikipedia/hi/thumb/c/c5/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png" alt="Digital India">
+        <img src="https://www.mygov.in/sites/default/files/mygov_logo_new.png" alt="MyGov">
+        <div style="font-weight:bold; margin-top:10px;">International Year of Cooperatives 2025</div>
+    </div>
+
+    <div class="info-links">
+        <a href="#">Website Policy</a> | <a href="#">Mobile App Privacy Policy</a> | <a href="#">Terms & Conditions</a> | <a href="#">Accessibility Statement</a> | <a href="#">Web Information Manager</a>
+        <br><br>
+        <a href="#">Feedback</a> | <a href="#">Sitemap</a> | <a href="#">Contact Us</a> | <a href="#">Vacancies</a> | <a href="#">Product & Services</a> | <a href="#">Pricing</a> | <a href="#">Cancellation Policy</a> | <a href="#">Grievance Management Policy</a>
+        <br><br>
+        Last Updated: ${new Date().toLocaleDateString('en-GB').replace(/\\//g, '-')} ${new Date().toLocaleTimeString()}
+    </div>
+
+    <div class="bottom-blue">
+        <img src="https://www.data.gov.in/sites/default/files/data-gov-logo.png" style="height:30px; background:white; padding:5px;"><br>
+        Website Developed & Maintained by Office of the Registrar General & Census Commissioner of India<br>
+        Ministry of Home Affairs<br><br>
+        &copy; 2026 - The Registrar General & Census Commissioner of India - ${new Date().toLocaleString()}
+    </div>
+</body>
+</html>`;
+    res.send(html);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Verification Error");
+  }
+});
+
+app.get("*", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+
+async function init() {
+  if (!MONGODB_URI) throw new Error("MONGODB_URI is missing. Add your MongoDB Atlas connection string to .env");
+  const client = new MongoClient(MONGODB_URI);
+  await client.connect();
+  const db = client.db(DB_NAME);
+  admins = db.collection("admins");
+  records = db.collection("birth_records");
+  await admins.createIndex({ username: 1 }, { unique: true });
+  await records.createIndex({ registration_number: 1 }, { unique: true });
+  const username = process.env.SUPERADMIN_USER || "superadmin";
+  const password = process.env.SUPERADMIN_PASS || "ChangeMe123!";
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  const existingAdmin = await admins.findOne({ username });
+  if (!existingAdmin) {
+    await admins.insertOne({
+      username,
+      password_hash: passwordHash,
+      full_name: "System Super Administrator",
+      role: "SUPER_ADMIN",
+      active: true,
+      created_at: new Date()
+    });
+    console.log(`Initial Super Admin created: ${username}`);
+  } else if (existingAdmin.role === "SUPER_ADMIN") {
+    // Force update password from .env to keep it in sync
+    await admins.updateOne(
+      { username },
+      { $set: { password_hash: passwordHash } }
+    );
+    console.log(`Super Admin password synced from .env`);
+  }
+  startServer(Number(PORT));
+}
+
+init().catch(error => {
+  console.error("Database initialization failed:", error.message);
+  process.exit(1);
+});

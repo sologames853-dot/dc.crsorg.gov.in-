@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Birth Record System</title>
+<style>
+*{box-sizing:border-box;}
+body{margin:0;font-family:Arial,sans-serif;background:#eef2f7;color:#1f2937;}
+header{background:#111827;color:white;padding:18px 25px;display:flex;justify-content:space-between;align-items:center;}
+header h1{margin:0;font-size:22px;}
+header span{font-size:13px;opacity:.8;}
+.container{max-width:1200px;margin:30px auto;padding:0 15px;}
+.card{background:white;border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:0 4px 18px rgba(0,0,0,.08);}
+.login{max-width:420px;margin:100px auto;}
+input,select,textarea{width:100%;padding:12px;margin-top:7px;margin-bottom:15px;border:1px solid #d1d5db;border-radius:7px;font-size:14px;}
+textarea{min-height:90px;}
+button{border:0;border-radius:7px;padding:11px 18px;cursor:pointer;background:#2563eb;color:white;font-weight:bold;}
+button:hover{opacity:.9;}
+button.danger{background:#dc2626;}
+button.secondary{background:#6b7280;}
+button.success{background:#059669;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;}
+.stat{background:#fff;padding:20px;border-radius:10px;text-align:center;}
+.stat strong{display:block;font-size:28px;margin-top:5px;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+th,td{padding:11px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px;}
+th{background:#f3f4f6;}
+.badge{padding:5px 9px;border-radius:20px;font-size:12px;}
+.active{background:#dcfce7;color:#166534;}
+.disabled{background:#fee2e2;color:#991b1b;}
+.hidden{display:none !important;}
+.notice{padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:7px;margin-bottom:15px;}
+.registration{font-weight:bold;font-size:18px;color:#1d4ed8;background:#eff6ff;padding:14px;border-radius:7px;}
+@media(max-width:700px){.grid,.stats{grid-template-columns:1fr;}table{display:block;overflow-x:auto;}}
+</style>
+</head>
+<body>
+<div id="loginPage" class="login">
+<div class="card">
+<h2>Birth Record System</h2>
+<p>Authorized Login</p>
+<input id="username" placeholder="Admin ID" autocomplete="username">
+<input id="password" type="password" placeholder="Password" autocomplete="current-password">
+<button onclick="login()">Login</button>
+<p id="loginMessage"></p>
+</div>
+</div>
+<div id="app" class="hidden">
+<header>
+<div><h1>Birth Record System</h1><span>Private Authorized Records System</span></div>
+<div><span id="userInfo"></span>&nbsp;<button class="secondary" onclick="logout()">Logout</button></div>
+</header>
+<div class="container">
+<div class="notice"><b>Important:</b> This is a private authorized record-management system. It is not a government certificate portal.</div>
+<div class="stats">
+<div class="stat">Total Records<strong id="totalRecords">0</strong></div>
+<div class="stat">Male<strong id="maleRecords">0</strong></div>
+<div class="stat">Female<strong id="femaleRecords">0</strong></div>
+<div class="stat">System<strong>ONLINE</strong></div>
+</div>
+<div id="superAdminPanel" class="card hidden">
+<h2>Super Admin — Admin Management</h2>
+<p>Super Admin can create Admin IDs and passwords.</p>
+<div class="grid">
+<div><label>Admin ID</label><input id="newAdminUsername" placeholder="Example: admin01"></div>
+<div><label>Admin Password</label><input id="newAdminPassword" type="password" placeholder="Minimum 8 characters"></div>
+</div>
+<label>Admin Name</label><input id="newAdminName" placeholder="Admin full name">
+<button onclick="createAdmin()">Create Admin</button>
+<hr>
+<h3>Admin Users</h3>
+<table>
+<thead><tr><th>ID</th><th>Admin ID</th><th>Name</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="adminTable"></tbody>
+</table>
+</div>
+<div class="card">
+<h2>Birth Record</h2>
+<form id="recordForm">
+<input type="hidden" id="recordId">
+<label>Name / नाम</label><input id="name" required>
+<div class="grid">
+<div><label>Sex / लिंग</label><select id="sex"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+<div><label>Date of Birth</label><input id="date_of_birth" type="date"></div>
+</div>
+<div class="grid">
+<div><label>Child Aadhaar (Optional)</label><input id="child_aadhaar"></div>
+<div><label>Place of Birth</label><input id="place_of_birth"></div>
+</div>
+<div class="grid">
+<div><label>Mother Name</label><input id="mother_name"></div>
+<div><label>Mother Aadhaar</label><input id="mother_aadhaar"></div>
+</div>
+<div class="grid">
+<div><label>Father Name</label><input id="father_name"></div>
+<div><label>Father Aadhaar</label><input id="father_aadhaar"></div>
+</div>
+<div class="grid">
+<div><label>District</label><input id="district" value="FIROZABAD"></div>
+<div><label>State</label><input id="state" value="UTTAR PRADESH"></div>
+</div>
+<label>Registration Number</label><div id="registrationPreview" class="registration">Automatically generated after saving</div>
+<label>Registration Date</label><input id="registration_date" type="date">
+<label>Address at time of Birth</label><textarea id="address"></textarea>
+<label>Permanent Address</label><textarea id="permanent_address"></textarea>
+<button type="submit">Save Birth Record</button>
+<button type="button" class="secondary" onclick="clearForm()">Clear</button>
+</form>
+</div>
+<div class="card">
+<h2>Birth Records</h2>
+<input id="search" placeholder="Search by name or registration number..." oninput="renderRecords()">
+<button onclick="loadRecords()">Refresh</button>
+<table>
+<thead><tr><th>Name</th><th>DOB</th><th>Registration Number</th><th>Created By</th><th>Action</th></tr></thead>
+<tbody id="recordsTable"></tbody>
+</table>
+</div>
+<div class="card">
+<h2>Record Verification</h2>
+<input id="verifyNumber" placeholder="Enter Registration Number">
+<button onclick="verifyRecord()">Verify</button>
+<div id="verifyResult"></div>
+</div>
+</div>
+</div>
+<script>
+console.log("Script loading...");
+let token=localStorage.getItem("birth_token");
+let currentUser=null;
+let records=[];
+async function api(url,options={}){
+options.headers={...(options.headers||{}),"Content-Type":"application/json",...(token?{"Authorization":"Bearer "+token}:{})};
+const response=await fetch(url,options);
+const data=await response.json();
+if(!response.ok){throw new Error(data.message||"Request failed");}
+return data;
+}
+async function login(){
+const username=document.getElementById("username").value.trim();
+const password=document.getElementById("password").value;
+const message=document.getElementById("loginMessage");
+message.textContent="";
+try{
+const data=await api("/api/admin/login",{method:"POST",body:JSON.stringify({username,password})});
+token=data.token;
+currentUser=data.user;
+localStorage.setItem("birth_token",token);
+showApp();
+}catch(error){message.textContent=error.message;}
+}
+function showApp(){
+document.getElementById("loginPage").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+document.getElementById("userInfo").textContent=(currentUser.full_name||currentUser.username)+" ("+currentUser.role+")";
+if(currentUser.role==="SUPER_ADMIN"){document.getElementById("superAdminPanel").classList.remove("hidden");loadAdmins();}
+else{document.getElementById("superAdminPanel").classList.add("hidden");}
+loadRecords();
+}
+function logout(){localStorage.removeItem("birth_token");token=null;currentUser=null;location.reload();}
+async function loadRecords(){try{records=await api("/api/records");renderRecords();updateStats();}catch(error){alert(error.message);}}
+function updateStats(){
+document.getElementById("totalRecords").textContent=records.length;
+document.getElementById("maleRecords").textContent=records.filter(r=>r.sex==="Male").length;
+document.getElementById("femaleRecords").textContent=records.filter(r=>r.sex==="Female").length;
+}
+function renderRecords(){
+const search=document.getElementById("search").value.toLowerCase();
+const table=document.getElementById("recordsTable");
+table.innerHTML="";
+records.filter(r=>String(r.name).toLowerCase().includes(search)||String(r.registration_number).toLowerCase().includes(search))
+.forEach(record=>{
+const row=document.createElement("tr");
+row.innerHTML="<td>"+escapeHTML(record.name)+"</td><td>"+escapeHTML(record.date_of_birth||"")+"</td><td><b>"+escapeHTML(record.registration_number)+"</b></td><td>"+escapeHTML(record.created_by_username||"")+"</td><td><button onclick=\"editRecord('"+record.id+"')\">Edit</button><button class=\"danger\" onclick=\"deleteRecord('"+record.id+"')\">Delete</button><button class=\"success\" onclick=\"printRecord('"+record.id+"')\">Print</button></td>";
+table.appendChild(row);
+});
+}
+document.getElementById("recordForm").addEventListener("submit",async function(event){
+event.preventDefault();
+const id=document.getElementById("recordId").value;
+const data={
+name:document.getElementById("name").value,sex:document.getElementById("sex").value,
+date_of_birth:document.getElementById("date_of_birth").value,place_of_birth:document.getElementById("place_of_birth").value,
+mother_name:document.getElementById("mother_name").value,mother_aadhaar:document.getElementById("mother_aadhaar").value,
+father_name:document.getElementById("father_name").value,father_aadhaar:document.getElementById("father_aadhaar").value,
+child_aadhaar:document.getElementById("child_aadhaar").value,registration_date:document.getElementById("registration_date").value,
+address:document.getElementById("address").value,permanent_address:document.getElementById("permanent_address").value,
+district:document.getElementById("district").value,state:document.getElementById("state").value
+};
+try{
+let result;
+if(id){result=await api("/api/records/"+id,{method:"PUT",body:JSON.stringify(data)});alert("Birth record updated successfully.");}
+else{result=await api("/api/records",{method:"POST",body:JSON.stringify(data)});alert("Birth record created.\n\nRegistration Number:\n"+result.record.registration_number);}
+clearForm();await loadRecords();
+}catch(error){alert(error.message);}
+});
+function editRecord(id){
+const record=records.find(r=>String(r.id)===String(id));
+if(!record)return;
+document.getElementById("recordId").value=record.id;
+document.getElementById("name").value=record.name||"";
+document.getElementById("sex").value=record.sex||"";
+document.getElementById("date_of_birth").value=record.date_of_birth||"";
+document.getElementById("place_of_birth").value=record.place_of_birth||"";
+document.getElementById("mother_name").value=record.mother_name||"";
+document.getElementById("mother_aadhaar").value=record.mother_aadhaar||"";
+document.getElementById("father_name").value=record.father_name||"";
+document.getElementById("father_aadhaar").value=record.father_aadhaar||"";
+document.getElementById("child_aadhaar").value=record.child_aadhaar||"";
+document.getElementById("registration_date").value=record.registration_date||"";
+document.getElementById("address").value=record.address||"";
+document.getElementById("permanent_address").value=record.permanent_address||"";
+document.getElementById("district").value=record.district||"FIROZABAD";
+document.getElementById("state").value=record.state||"UTTAR PRADESH";
+document.getElementById("registrationPreview").textContent=record.registration_number;
+window.scrollTo({top:0,behavior:"smooth"});
+}
+function clearForm(){
+document.getElementById("recordForm").reset();
+document.getElementById("recordId").value="";
+document.getElementById("registrationPreview").textContent="Automatically generated after saving";
+document.getElementById("district").value="FIROZABAD";
+document.getElementById("state").value="UTTAR PRADESH";
+}
+async function deleteRecord(id){
+if(!confirm("Delete this birth record?"))return;
+try{await api("/api/records/"+id,{method:"DELETE"});await loadRecords();}
+catch(error){alert(error.message);}
+}
+async function createAdmin(){
+const username=document.getElementById("newAdminUsername").value.trim();
+const password=document.getElementById("newAdminPassword").value;
+const full_name=document.getElementById("newAdminName").value.trim();
+if(!username||!password){alert("Admin ID and password are required.");return;}
+try{
+const data=await api("/api/admins",{method:"POST",body:JSON.stringify({username,password,full_name})});
+alert("Admin created successfully.\n\nAdmin ID: "+data.admin.username);
+document.getElementById("newAdminUsername").value="";document.getElementById("newAdminPassword").value="";document.getElementById("newAdminName").value="";
+loadAdmins();
+}catch(error){alert(error.message);}
+}
+async function loadAdmins(){
+try{
+const admins=await api("/api/admins");
+const table=document.getElementById("adminTable");
+table.innerHTML="";
+admins.forEach(admin=>{
+const row=document.createElement("tr");
+row.innerHTML="<td>"+admin.id+"</td><td><b>"+escapeHTML(admin.username)+"</b></td><td>"+escapeHTML(admin.full_name||"")+"</td><td><span class=\"badge "+(admin.active?"active":"disabled")+"\">"+(admin.active?"ACTIVE":"DISABLED")+"</span></td><td>"+(admin.role==="ADMIN"?"<button onclick=\"toggleAdmin('"+admin.id+"',"+admin.active+")\">"+(admin.active?"Disable":"Enable")+"</button>":"<b>SUPER ADMIN</b>")+"</td>";
+table.appendChild(row);
+});
+}catch(error){alert(error.message);}
+}
+async function toggleAdmin(id,currentStatus){try{await api("/api/admins/"+id+"/status",{method:"PATCH",body:JSON.stringify({active:!currentStatus})});loadAdmins();}catch(error){alert(error.message);}}
+async function verifyRecord(){
+const number=document.getElementById("verifyNumber").value.trim();
+const resultBox=document.getElementById("verifyResult");
+resultBox.innerHTML="";
+if(!number){resultBox.innerHTML="<p>Please enter registration number.</p>";return;}
+try{
+const data=await fetch("/api/verify/"+encodeURIComponent(number));
+const json=await data.json();
+if(!data.ok){resultBox.innerHTML="<p>"+escapeHTML(json.message)+"</p>";return;}
+const r=json.record;
+resultBox.innerHTML="<div class=\"card\"><h3>Record Verified</h3><p><b>Registration Number:</b> "+escapeHTML(r.registration_number)+"</p><p><b>Name:</b> "+escapeHTML(r.name)+"</p><p><b>Date of Birth:</b> "+escapeHTML(r.date_of_birth||"")+"</p><p><b>Place of Birth:</b> "+escapeHTML(r.place_of_birth||"")+"</p></div>";
+}catch(error){resultBox.innerHTML="<p>Verification failed.</p>";}
+}
+function printRecord(id){
+const record=records.find(r=>String(r.id)===String(id));
+if(!record)return;
+const dobDate=new Date(record.date_of_birth);
+const formattedDOB=isNaN(dobDate.getTime())?record.date_of_birth:dobDate.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
+const regDate=new Date(record.registration_date);
+const formattedRegDate=isNaN(regDate.getTime())?record.registration_date:regDate.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
+const issueDate=new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}).replace(/\//g,'-');
+const validationUrl=window.location.origin+"/verify-record/"+record.registration_number;
+const qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data="+encodeURIComponent(validationUrl);
+const barcodeUrl="https://bwipjs-api.metafloor.com/?bcid=code128&text="+record.registration_number+"&scale=2&rotate=N&includetext";
+    const printWindow=window.open("","_blank","width=900,height=1000");
+    const html="<!DOCTYPE html><html><head><title>Birth Certificate - "+record.registration_number+"</title><style>@page{size:A4;margin:0;}body{font-family:'Times New Roman',serif;margin:0;padding:20px;background:#fff;color:#000;font-size:11px;}.cert-border{border:1px solid #000;padding:15px;height:96vh;position:relative;}.header-container{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;}.header-left{width:20%;text-align:center;}.header-center{width:60%;text-align:center;}.header-right{width:20%;text-align:center;}.up-seal{width:85px;margin-top:5px;}.national-emblem{width:50px;}.crs-logo{width:75px;margin-top:5px;}.header-text-top{font-size:14px;font-weight:bold;margin-top:2px;}.header-text-blue{color:#1e3a8a;font-size:15px;font-weight:bold;margin:2px 0;}.header-text-dept{font-size:12px;font-weight:bold;margin:1px 0;}.header-text-office{color:#1e3a8a;font-size:15px;font-weight:bold;margin:3px 0;}.header-text-title-hi{color:#166534;font-size:14px;font-weight:bold;margin-top:5px;}.header-text-title-en{color:#166534;font-size:16px;font-weight:bold;display:inline-block;padding-bottom:2px;margin-bottom:5px;}.statutory-text{font-size:9px;line-height:1.2;text-align:justify;margin:10px 0;padding-bottom:8px;}.hindi{font-family:sans-serif;}.content-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:8px;margin-bottom:8px;}.field{margin-bottom:6px;display:flex;flex-direction:column;}.label{font-weight:bold;margin-bottom:1px;font-size:10px;}.value{text-transform:uppercase;font-size:11px;}.footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:15px;}.qr-code{width:85px;height:85px;}.signature-area{text-align:center;font-weight:bold;font-size:10px;}.barcode-container{text-align:center;margin-top:20px;padding-top:10px;}.barcode{width:320px;height:45px;}.bottom-disclaimer{font-size:8.5px;text-align:center;margin-top:10px;padding-top:5px;line-height:1.3;}.green-banner{color:#15803d;font-weight:bold;font-size:9px;margin-top:5px;display:block;}</style></head><body><div class=\"cert-border\"><div class=\"header-container\"><div class=\"header-left\"><div>सं. 1 / No. 1</div><img src=\"/image/up_logo.png\" class=\"up-seal\"></div><div class=\"header-center\"><img src=\"/image/emblem.png\" class=\"national-emblem\"><div style=\"font-size:9px;margin-bottom:5px;\">सत्यमेव जयते</div><div class=\"header-text-top\">उत्तर प्रदेश सरकार</div><div class=\"header-text-blue\">GOVERNMENT OF UTTAR PRADESH</div><div class=\"header-text-dept\">चिकित्सा एवं स्वास्थ्य विभाग / DEPARTMENT OF MEDICAL AND HEALTH</div><div class=\"header-text-office\">नगर निगम फ़िरोज़ाबाद / NAGAR NIGAM FIROZABAD</div><div class=\"header-text-title-hi\">जन्म प्रमाण पत्र</div><div class=\"header-text-title-en\">BIRTH CERTIFICATE</div></div><div class=\"header-right\"><div>प्रपत्र-05 / FORM-5</div><img src=\"/image/crs_logo.png\" class=\"crs-logo\"></div></div><div class=\"statutory-text\">(जन्म-मृत्यु रजिस्ट्रीकरण अधिनियम, 1969 की धारा 12/17 तथा उत्तर प्रदेश जन्म-मृत्यु रजिस्ट्रीकरण नियमावली, 2002 के नियम 8/13 के अंतर्गत जारी किया गया)<br>(ISSUED UNDER SECTION 12/17 OF THE REGISTRATION OF BIRTHS AND DEATHS ACT, 1969 AND RULE 8/13 OF THE UTTAR PRADESH REGISTRATION OF BIRTHS AND DEATHS RULES, 2002)<br><br>यह प्रमाणित किया जाता है कि निम्नलिखित सूचना मूल जन्म अभिलेख से ली गई है जो कि नगर निगम "+record.district+" तहसील/ब्लॉक "+record.district+" जिला "+record.district+" राज्य "+record.state+", भारत के रजिस्टर में उपलब्ध है।<br>THIS IS TO CERTIFY THAT THE FOLLOWING INFORMATION HAS BEEN TAKEN FROM THE ORIGINAL RECORD OF BIRTH WHICH IS THE REGISTER FOR NAGAR NIGAM "+record.district+" OF TAHSIL/BLOCK "+record.district+" OF DISTRICT "+record.district+" OF STATE/UNION TERRITORY "+record.state+", INDIA.</div><div class=\"content-grid\"><div class=\"field\"><div class=\"label\">नाम / NAME:</div><div class=\"value\">"+record.name+"</div></div><div class=\"field\"><div class=\"label\">लिंग / SEX:</div><div class=\"value\">"+record.sex+"</div></div><div class=\"field\"><div class=\"label\">आधार नंबर / AADHAR NO.:</div><div class=\"value\">"+(record.child_aadhaar||'XXXXXXXXXXXX')+"</div></div><div class=\"field\"></div></div><div class=\"content-grid\"><div class=\"field\"><div class=\"label\">जन्म तिथि / DATE OF BIRTH:</div><div class=\"value\">"+formattedDOB+"</div></div><div class=\"field\"><div class=\"label\">जन्म स्थान / PLACE OF BIRTH:</div><div class=\"value\">"+record.place_of_birth+"</div></div><div class=\"field\"><div class=\"label\">माता का नाम / NAME OF MOTHER:</div><div class=\"value\">"+record.mother_name+"</div></div><div class=\"field\"><div class=\"label\">पिता का नाम / NAME OF FATHER:</div><div class=\"value\">"+record.father_name+"</div></div><div class=\"field\"><div class=\"label\">माता का आधार नंबर / MOTHER'S AADHAAR NO:</div><div class=\"value\">"+(record.mother_aadhaar||'XXXXXXXXXXXX')+"</div></div><div class=\"field\"><div class=\"label\">पिता का आधार नंबर / FATHER'S AADHAAR NO:</div><div class=\"value\">"+(record.father_aadhaar||'XXXXXXXXXXXX')+"</div></div></div><div style=\"margin-bottom:8px;\"><div class=\"label\">बच्चे के जन्म के समय माता-पिता का पता / ADDRESS OF PARENTS AT THE TIME OF BIRTH OF THE CHILD:</div><div class=\"value\">"+record.address+"</div></div><div style=\"margin-bottom:10px;\"><div class=\"label\">माता-पिता का स्थायी पता / PERMANENT ADDRESS OF PARENTS:</div><div class=\"value\">"+(record.permanent_address||record.address)+"</div></div><div class=\"content-grid\"><div class=\"field\"><div class=\"label\">पंजीकरण संख्या / REGISTRATION NUMBER:</div><div class=\"value\"><b>"+record.registration_number+"</b></div></div><div class=\"field\"><div class=\"label\">पंजीकरण दिनांक / DATE OF REGISTRATION:</div><div class=\"value\">"+formattedRegDate+"</div></div></div><div class=\"field\" style=\"margin-bottom:10px;\"><div class=\"label\">टिप्पणी / REMARKS (IF ANY):</div><div class=\"value\">---</div></div><div class=\"footer\"><div><div class=\"field\"><div class=\"label\">जारी करने की तिथि / DATE OF ISSUE:</div><div class=\"value\">"+issueDate+"</div></div><div class=\"field\" style=\"margin-top:8px;\"><div class=\"label\">UPDATED ON :</div><div class=\"value\">"+issueDate+"</div></div><img src=\""+qrUrl+"\" class=\"qr-code\"></div><div class=\"signature-area\"><img src=\"/image/signature.png\" style=\"width:90px;margin-bottom:5px;background:white;mix-blend-mode:multiply;\" onerror=\"this.style.display='none'\"><br>जारी करने वाले प्राधिकारी / ISSUING AUTHORITY<br><span style=\"color:#c026d3;\">रजिस्ट्रार (जन्म एवं मृत्यु)</span><br><span style=\"color:#2563eb;\">REGISTRAR (BIRTH & DEATH)</span><br><span style=\"color:#c026d3;\">नगर निगम "+record.district+"</span><br><span style=\"color:#c026d3;\">NAGAR NIGAM "+record.district+"</span></div></div><div class=\"bottom-disclaimer\">\"THIS IS A COMPUTER GENERATED CERTIFICATE WHICH CONTAINS FACSIMILE SIGNATURE OF THE ISSUING AUTHORITY\"<br>\"THE GOVT. OF INDIA VIDE CIRCULAR NO. 1/12/2014-VS(CRS) DATED 27-JULY-2015 HAS APPROVED THIS CERTIFICATE AS A VALID LEGAL DOCUMENT FOR ALL OFFICIAL PURPOSES\".<br><span class=\"green-banner\">\"प्रत्येक जन्म एवं मृत्यु का पंजीकरण सुनिश्चित कराएं\" / \"ENSURE REGISTRATION OF EVERY BIRTH AND DEATH\"</span></div><div class=\"barcode-container\"><img src=\""+barcodeUrl+"\" class=\"barcode\"></div></div><script>window.onload=function(){const images=Array.from(document.getElementsByTagName('img'));let loaded=0;function checkDone(){loaded++;if(loaded>=images.length){setTimeout(()=>{window.print();},500);}}if(images.length===0){window.print();}else{images.forEach(img=>{if(img.complete){checkDone();}else{img.addEventListener('load',checkDone);img.addEventListener('error',checkDone);}});setTimeout(()=>{if(loaded<images.length)window.print();},4000);}};</scr"+"ipt></body></html>";
+printWindow.document.write(html);
+printWindow.document.close();
+}
+function escapeHTML(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
+async function autoLogin(){if(!token){return;}try{currentUser=await api("/api/admin/me");showApp();}catch(error){localStorage.removeItem("birth_token");token=null;}}
+autoLogin();
+console.log("Script loaded successfully");
+</script>
+</body>
+</html>
