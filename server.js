@@ -248,28 +248,33 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validate Certificate | Civil Registration System</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f0f4f8; color: #333; }
-        .header { background-color: #0056b3; color: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; }
-        .header-title { display: flex; align-items: center; gap: 10px; }
-        .header-title svg { fill: #4CAF50; width: 24px; height: 24px; }
+        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #333; }
+        .header { background-color: #1e6091; color: white; padding: 14px 15px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 16px; }
+        .header-title { display: flex; align-items: center; gap: 8px; }
+        .header-title svg { fill: #4CAF50; width: 20px; height: 20px; }
 
-        .container { padding: 10px; }
-        .record-table { width: 100%; background: white; border-collapse: collapse; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .record-table td { padding: 12px; border: 1px solid #ddd; font-size: 14px; vertical-align: top; }
-        .label { background-color: #f9f9f9; width: 35%; color: #555; font-weight: 500; }
-        .value { color: #000; font-weight: bold; text-transform: uppercase; }
+        .container { padding: 12px; }
+        .record-table { width: 100%; background: white; border-collapse: collapse; margin-top: 5px; }
+        .record-table td { padding: 12px 10px; border: 1px solid #e0e0e0; font-size: 15px; vertical-align: middle; line-height: 1.4; }
+        .label { width: 38%; color: #444; font-weight: 500; }
+        .value { color: #000; font-weight: normal; }
 
-        .footer-logos { text-align: center; margin-top: 20px; background: #fff; padding: 20px 0; }
-        .footer-logos img { max-width: 150px; display: block; margin: 10px auto; }
+        .footer-logos { text-align: center; margin-top: 25px; background: #ffffff; padding: 15px 0; border-top: 1px solid #eaeaea; }
+        .footer-logos .logo-row { display: flex; justify-content: center; gap: 15px; align-items: center; margin-bottom: 15px; }
+        .footer-logos img { height: 45px; object-fit: contain; }
+        .footer-logos .gov-box { background: #0a192f; color: white; padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 3px; display: inline-block; margin-bottom: 12px; text-transform: uppercase; }
+        .footer-logos .gov-box span { color: #ff9933; }
+        .footer-logos .gov-box span.green { color: #128807; }
+        .footer-logos .india-portal { background: #eaeaea; padding: 10px; font-weight: bold; font-size: 16px; color: #111; display: inline-flex; align-items: center; justify-content: center; width: 220px; border: 1px solid #ccc; margin-bottom: 12px; }
+        .footer-logos .pm-india { background: #222; color: #fff; padding: 8px 20px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; border-radius: 2px; margin-bottom: 15px; }
+        .footer-logos .coop-banner { border: 1px dashed #e11d48; padding: 6px 12px; color: #b91c1c; font-size: 13px; font-weight: bold; display: inline-block; border-radius: 4px; }
 
-        .info-links { background-color: #008080; color: white; padding: 20px; text-align: center; font-size: 12px; line-height: 1.8; }
-        .info-links a { color: white; text-decoration: none; margin: 0 5px; border-right: 1px solid #fff; padding-right: 10px; }
-        .info-links a:last-child { border-right: none; }
+        .info-links { background-color: #0d9488; color: white; padding: 25px 15px; text-align: center; font-size: 13px; line-height: 2; margin-top: 30px; }
+        .info-links a { color: white; text-decoration: none; margin: 0 4px; display: inline-block; }
+        .info-links .separator { margin: 0 4px; color: rgba(255,255,255,0.6); }
 
-        .bottom-blue { background-color: #0056b3; color: white; padding: 20px; text-align: center; font-size: 11px; }
-        .bottom-blue img { height: 40px; margin: 10px; }
-
-        .verified-badge { color: #4CAF50; display: flex; align-items: center; gap: 5px; font-size: 13px; }
+        .bottom-blue { background-color: #0f172a; color: #94a3b8; padding: 25px 15px; text-align: center; font-size: 12px; line-height: 1.6; }
+        .bottom-blue .main-text { color: #f8fafc; font-weight: 500; font-size: 13px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -278,14 +283,14 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
             <span>Validate Certificate | Civil R...</span>
         </div>
-        <div>&#8635;</div>
+        <div style="cursor:pointer;" onclick="location.reload()">&#8635;</div>
     </div>
 
     <div class="container">
         <table class="record-table">
             <tr>
                 <td class="label">Registration Number</td>
-                <td class="value">${record.registration_number}</td>
+                <td class="value" style="font-weight:bold; color:#1e3a8a;">${record.registration_number}</td>
             </tr>
             <tr>
                 <td class="label">NAME</td>
@@ -310,8 +315,7 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
             <tr>
                 <td class="label">Place of Birth</td>
                 <td class="value">
-                    ${record.place_of_birth}<br>
-                    ${record.district || 'FIROZABAD'}, ${record.state || 'UTTAR PRADESH'}
+                    ${record.place_of_birth}, ${record.district || 'FIROZABAD'}, ${record.state || 'UTTAR PRADESH'}
                 </td>
             </tr>
             <tr>
@@ -324,30 +328,41 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
             </tr>
             <tr>
                 <td class="label">Registration Unit Code</td>
-                <td class="value">${String(record.registration_number).substring(1, 6)}</td>
+                <td class="value">09457</td>
             </tr>
         </table>
     </div>
 
     <div class="footer-logos">
-        <img src="https://upload.wikimedia.org/wikipedia/hi/thumb/c/c5/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png" alt="Digital India">
-        <img src="https://www.mygov.in/sites/default/files/mygov_logo_new.png" alt="MyGov">
-        <div style="font-weight:bold; margin-top:10px;">International Year of Cooperatives 2025</div>
+        <div class="gov-box">data.<span>gov</span>.in<br><small style="font-size:9px; font-weight:normal; display:block; color:#ccc; text-transform:none;">Open Government Data (OGD) Platform India</small></div>
+        <br>
+        <div class="india-portal">india.<span style="color:#ff9933;">gov</span>.<span style="color:#128807;">in</span></div>
+        <br>
+        <div class="pm-india"><span style="font-size:14px;">🏛️</span> PM INDIA</div>
+        <br>
+        <div class="logo-row" style="margin-top:10px;">
+            <img src="https://upload.wikimedia.org/wikipedia/hi/thumb/c/c5/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png" alt="Digital India" style="height:35px;">
+            <img src="https://www.mygov.in/sites/default/files/mygov_logo_new.png" alt="MyGov" style="height:35px;">
+        </div>
+        <div class="coop-banner">
+            International Year of Cooperatives 2025<br>
+            <span style="font-size:11px; font-weight:normal; color:#555;">Cooperatives Build a Better World</span>
+        </div>
     </div>
 
     <div class="info-links">
-        <a href="#">Website Policy</a> | <a href="#">Mobile App Privacy Policy</a> | <a href="#">Terms & Conditions</a> | <a href="#">Accessibility Statement</a> | <a href="#">Web Information Manager</a>
+        <a href="#">Website Policy</a><span class="separator">|</span><a href="#">Mobile App Privacy Policy</a><span class="separator">|</span><a href="#">Terms & Conditions</a><span class="separator">|</span><a href="#">Accessibility Statement</a><span class="separator">|</span><a href="#">Web Information Manager</a>
+        <br>
+        <a href="#">Feedback</a><span class="separator">|</span><a href="#">Sitemap</a><span class="separator">|</span><a href="#">Contact Us</a><span class="separator">|</span><a href="#">Vacancies</a><span class="separator">|</span><a href="#">Product & Services</a><span class="separator">|</span><a href="#">Pricing</a><span class="separator">|</span><a href="#">Cancellation Policy</a><span class="separator">|</span><a href="#">Grievance Management Policy</a>
         <br><br>
-        <a href="#">Feedback</a> | <a href="#">Sitemap</a> | <a href="#">Contact Us</a> | <a href="#">Vacancies</a> | <a href="#">Product & Services</a> | <a href="#">Pricing</a> | <a href="#">Cancellation Policy</a> | <a href="#">Grievance Management Policy</a>
-        <br><br>
-        Last Updated: ${new Date().toLocaleDateString('en-GB').replace(/\\//g, '-')} ${new Date().toLocaleTimeString()}
+        Last Updated: 30-01-2024 12:16:17
     </div>
 
     <div class="bottom-blue">
-        <img src="https://www.data.gov.in/sites/default/files/data-gov-logo.png" style="height:30px; background:white; padding:5px;"><br>
         Website Developed & Maintained by Office of the Registrar General & Census Commissioner of India<br>
-        Ministry of Home Affairs<br><br>
-        &copy; 2026 - The Registrar General & Census Commissioner of India - ${new Date().toLocaleString()}
+        <div class="main-text">Ministry of Home Affairs</div>
+        <br>
+        <span style="font-size:11px; color:#64748b;">&copy; 2026 - The Registrar General & Census Commissioner of India - Sep 15, 2026, 12:33:49 PM</span>
     </div>
 </body>
 </html>`;
