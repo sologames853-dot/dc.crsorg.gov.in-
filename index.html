@@ -55,7 +55,8 @@ th{background:#f3f4f6;}
 <div class="container">
 <div class="notice"><b>Important:</b> This is a private authorized record-management system. It is not a government certificate portal.</div>
 <div class="stats">
-<div class="stat">Wallet Balance<strong id="walletBalance">₹0</strong></div>
+<div id="walletStatBox" class="stat">Wallet Balance<strong id="walletBalance">₹0</strong></div>
+<div id="totalCollectionBox" class="stat hidden">Total Collection<strong id="totalCollection">₹0</strong></div>
 <div class="stat">Total Records<strong id="totalRecords">0</strong></div>
 <div class="stat">Male<strong id="maleRecords">0</strong></div>
 <div class="stat">System<strong>ONLINE</strong></div>
@@ -181,12 +182,16 @@ if(currentUser.role==="SUPER_ADMIN"){
   document.getElementById("superAdminPanel").classList.remove("hidden");
   document.getElementById("superAdminWalletPanel").classList.remove("hidden");
   document.getElementById("adminWalletPanel").classList.add("hidden");
+  document.getElementById("walletStatBox").classList.add("hidden");
+  document.getElementById("totalCollectionBox").classList.remove("hidden");
   loadAdmins();
   loadWalletRequests();
 } else {
   document.getElementById("superAdminPanel").classList.add("hidden");
   document.getElementById("superAdminWalletPanel").classList.add("hidden");
   document.getElementById("adminWalletPanel").classList.remove("hidden");
+  document.getElementById("walletStatBox").classList.remove("hidden");
+  document.getElementById("totalCollectionBox").classList.add("hidden");
   loadMyWalletRequests();
 }
 loadRecords();
@@ -204,7 +209,9 @@ async function loadRecords(){
   } catch(error){alert(error.message);}
 }
 function updateStats(){
-document.getElementById("walletBalance").textContent="₹"+(currentUser.wallet_balance||0);
+if(currentUser.role==="ADMIN"){
+  document.getElementById("walletBalance").textContent="₹"+(currentUser.wallet_balance||0);
+}
 document.getElementById("totalRecords").textContent=records.length;
 document.getElementById("maleRecords").textContent=records.filter(r=>r.sex==="Male").length;
 }
@@ -327,7 +334,9 @@ async function loadMyWalletRequests() {
 
 async function loadWalletRequests() {
   try {
-    const list = await api("/api/wallet/requests");
+    const data = await api("/api/wallet/requests");
+    const list = data.requests;
+    document.getElementById("totalCollection").textContent = "₹" + (data.totalApproved || 0);
     const table = document.getElementById("walletApprovalTable");
     table.innerHTML = "";
     list.forEach(r => {

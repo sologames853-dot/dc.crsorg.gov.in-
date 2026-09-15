@@ -134,7 +134,11 @@ app.patch("/api/admins/:id/status", auth, requireRole("SUPER_ADMIN"), async (req
 });
 
 app.get("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
-  const list = await records.find({}).sort({ created_at: -1 }).toArray();
+  let query = {};
+  if (req.user.role === "ADMIN") {
+    query = { created_by: objectId(req.user.id) };
+  }
+  const list = await records.find(query).sort({ created_at: -1 }).toArray();
   const creatorIds = [...new Set(list.filter(r => r.created_by).map(r => String(r.created_by)))].map(objectId).filter(Boolean);
   const creators = await admins.find({ _id: { $in: creatorIds } }).toArray();
   const names = new Map(creators.map(admin => [String(admin._id), admin.username]));
@@ -260,7 +264,8 @@ app.post("/api/wallet/request", auth, requireRole("ADMIN"), async (req, res) => 
 
 app.get("/api/wallet/requests", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
   const list = await walletRequests.find({}).sort({ created_at: -1 }).toArray();
-  res.json(list.map(r => ({ ...r, id: String(r._id), admin_id: String(r.admin_id) })));
+  const totalApproved = list.filter(r => r.status === "APPROVED").reduce((sum, r) => sum + r.amount, 0);
+  res.json({ requests: list.map(r => ({ ...r, id: String(r._id), admin_id: String(r.admin_id) })), totalApproved });
 });
 
 app.get("/api/wallet/my-requests", auth, requireRole("ADMIN"), async (req, res) => {
