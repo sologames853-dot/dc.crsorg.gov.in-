@@ -55,10 +55,32 @@ th{background:#f3f4f6;}
 <div class="container">
 <div class="notice"><b>Important:</b> This is a private authorized record-management system. It is not a government certificate portal.</div>
 <div class="stats">
+<div class="stat">Wallet Balance<strong id="walletBalance">₹0</strong></div>
 <div class="stat">Total Records<strong id="totalRecords">0</strong></div>
 <div class="stat">Male<strong id="maleRecords">0</strong></div>
-<div class="stat">Female<strong id="femaleRecords">0</strong></div>
 <div class="stat">System<strong>ONLINE</strong></div>
+</div>
+<div id="adminWalletPanel" class="card hidden">
+<h2>Recharge Wallet</h2>
+<p>Transfer amount to UPI: <b>mrid55638@naviaxis</b></p>
+<div class="grid">
+<div><label>Recharge Amount (₹)</label><input id="rechargeAmount" type="number" placeholder="Enter amount"></div>
+<div><label>Transaction UTR / Ref No.</label><input id="rechargeUTR" placeholder="Enter UTR number"></div>
+</div>
+<button class="success" onclick="requestWallet()">Submit Recharge Request</button>
+<hr>
+<h3>My Recharge Requests</h3>
+<table>
+<thead><tr><th>Date</th><th>Amount</th><th>UTR</th><th>Status</th></tr></thead>
+<tbody id="myWalletTable"></tbody>
+</table>
+</div>
+<div id="superAdminWalletPanel" class="card hidden">
+<h2>Super Admin — Wallet Approval</h2>
+<table>
+<thead><tr><th>Admin</th><th>Amount</th><th>UTR</th><th>Date</th><th>Action</th></tr></thead>
+<tbody id="walletApprovalTable"></tbody>
+</table>
 </div>
 <div id="superAdminPanel" class="card hidden">
 <h2>Super Admin — Admin Management</h2>
@@ -155,16 +177,36 @@ function showApp(){
 document.getElementById("loginPage").classList.add("hidden");
 document.getElementById("app").classList.remove("hidden");
 document.getElementById("userInfo").textContent=(currentUser.full_name||currentUser.username)+" ("+currentUser.role+")";
-if(currentUser.role==="SUPER_ADMIN"){document.getElementById("superAdminPanel").classList.remove("hidden");loadAdmins();}
-else{document.getElementById("superAdminPanel").classList.add("hidden");}
+if(currentUser.role==="SUPER_ADMIN"){
+  document.getElementById("superAdminPanel").classList.remove("hidden");
+  document.getElementById("superAdminWalletPanel").classList.remove("hidden");
+  document.getElementById("adminWalletPanel").classList.add("hidden");
+  loadAdmins();
+  loadWalletRequests();
+} else {
+  document.getElementById("superAdminPanel").classList.add("hidden");
+  document.getElementById("superAdminWalletPanel").classList.add("hidden");
+  document.getElementById("adminWalletPanel").classList.remove("hidden");
+  loadMyWalletRequests();
+}
 loadRecords();
 }
 function logout(){localStorage.removeItem("birth_token");token=null;currentUser=null;location.reload();}
-async function loadRecords(){try{records=await api("/api/records");renderRecords();updateStats();}catch(error){alert(error.message);}}
+async function loadRecords(){
+  try {
+    if(currentUser && currentUser.role==="ADMIN"){
+      const me = await api("/api/admin/me");
+      currentUser.wallet_balance = me.wallet_balance;
+    }
+    records=await api("/api/records");
+    renderRecords();
+    updateStats();
+  } catch(error){alert(error.message);}
+}
 function updateStats(){
+document.getElementById("walletBalance").textContent="₹"+(currentUser.wallet_balance||0);
 document.getElementById("totalRecords").textContent=records.length;
 document.getElementById("maleRecords").textContent=records.filter(r=>r.sex==="Male").length;
-document.getElementById("femaleRecords").textContent=records.filter(r=>r.sex==="Female").length;
 }
 function renderRecords(){
 const search=document.getElementById("search").value.toLowerCase();
@@ -254,6 +296,70 @@ table.appendChild(row);
 }catch(error){alert(error.message);}
 }
 async function toggleAdmin(id,currentStatus){try{await api("/api/admins/"+id+"/status",{method:"PATCH",body:JSON.stringify({active:!currentStatus})});loadAdmins();}catch(error){alert(error.message);}}
+
+// Wallet Frontend Scripting
+async function requestWallet() {
+  const amount = Number(document.getElementById("rechargeAmount").value);
+  const utr = document.getElementById("rechargeUTR").value.trim();
+  if (!amount || amount <= 0) { alert("Please enter a valid amount."); return; }
+  if (!utr) { alert("Please enter the Transaction UTR / Ref Number."); return; }
+  try {
+    const data = await api("/api/wallet/request", { method: "POST", body: JSON.stringify({ amount, utr }) });
+    alert(data.message);
+    document.getElementById("rechargeAmount").value = "";
+    document.getElementById("rechargeUTR").value = "";
+    loadMyWalletRequests();
+  } catch(error) { alert(error.message); }
+}
+
+async function loadMyWalletRequests() {
+  try {
+    const list = await api("/api/wallet/my-requests");
+    const table = document.getElementById("myWalletTable");
+    table.innerHTML = "";
+    list.forEach(r => {
+      const row = document.createElement("tr");
+      row.innerHTML = "<td>"+new Date(r.created_at).toLocaleDateString()+"</td><td>₹"+r.amount+"</td><td>"+escapeHTML(r.utr)+"</td><td><span class='badge "+r.status.toLowerCase()+"'>"+r.status+"</span></td>";
+      table.appendChild(row);
+    });
+  } catch(error) { console.error(error); }
+}
+
+async function loadWalletRequests() {
+  try {
+    const list = await api("/api/wallet/requests");
+    const table = document.getElementById("walletApprovalTable");
+    table.innerHTML = "";
+    list.forEach(r => {
+      const row = document.createElement("tr");
+      let actionHtml = "<b>"+r.status+"</b>";
+      if (r.status === "PENDING") {
+        actionHtml = "<button class='success' onclick='approveWallet(\""+r.id+"\")'>Approve</button> <button class='danger' onclick='rejectWallet(\""+r.id+"\")'>Reject</button>";
+      }
+      row.innerHTML = "<td>"+escapeHTML(r.username)+"</td><td>₹"+r.amount+"</td><td>"+escapeHTML(r.utr)+"</td><td>"+new Date(r.created_at).toLocaleDateString()+"</td><td>"+actionHtml+"</td>";
+      table.appendChild(row);
+    });
+  } catch(error) { console.error(error); }
+}
+
+async function approveWallet(id) {
+  if(!confirm("Approve this wallet recharge?")) return;
+  try {
+    const data = await api("/api/wallet/approve/"+id, { method: "POST" });
+    alert(data.message);
+    loadWalletRequests();
+  } catch(error) { alert(error.message); }
+}
+
+async function rejectWallet(id) {
+  if(!confirm("Reject this wallet recharge?")) return;
+  try {
+    const data = await api("/api/wallet/reject/"+id, { method: "POST" });
+    alert(data.message);
+    loadWalletRequests();
+  } catch(error) { alert(error.message); }
+}
+
 async function verifyRecord(){
 const number=document.getElementById("verifyNumber").value.trim();
 const resultBox=document.getElementById("verifyResult");

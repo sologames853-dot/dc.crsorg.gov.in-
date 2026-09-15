@@ -40,7 +40,7 @@ function startServer(port) {
 }
 
 function publicAdmin(admin) {
-  return { id: String(admin._id), username: admin.username, full_name: admin.full_name || "", role: admin.role, active: admin.active, created_at: admin.created_at };
+  return { id: String(admin._id), username: admin.username, full_name: admin.full_name || "", role: admin.role, active: admin.active, wallet_balance: admin.wallet_balance || 0, created_at: admin.created_at };
 }
 
 function publicRecord(record) {
@@ -109,7 +109,7 @@ app.post("/api/admins", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
     if (!username || !password) return res.status(400).json({ message: "Admin ID and password are required" });
     if (username.length < 4) return res.status(400).json({ message: "Admin ID must contain at least 4 characters" });
     if (password.length < 8) return res.status(400).json({ message: "Password must contain at least 8 characters" });
-    const admin = { username, password_hash: await bcrypt.hash(password, 12), full_name, role: "ADMIN", active: true, created_at: new Date() };
+    const admin = { username, password_hash: await bcrypt.hash(password, 12), full_name, role: "ADMIN", active: true, wallet_balance: 0, created_at: new Date() };
     await admins.insertOne(admin);
     res.json({ success: true, admin: publicAdmin(admin) });
   } catch (error) {
@@ -143,6 +143,15 @@ app.get("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, r
 
 app.post("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   try {
+    // Check wallet balance for normal ADMIN
+    let currentAdmin = null;
+    if (req.user.role === "ADMIN") {
+      currentAdmin = await admins.findOne({ _id: objectId(req.user.id) });
+      if (!currentAdmin || (currentAdmin.wallet_balance || 0) < 48) {
+        return res.status(402).json({ message: "Insufficient wallet balance. Minimum 48rs required to create a birth record." });
+      }
+    }
+
     const name = String(req.body.name || "").trim();
     if (!name) return res.status(400).json({ message: "Name is required" });
     const record = {
@@ -167,6 +176,12 @@ app.post("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, 
       updated_at: new Date()
     };
     await records.insertOne(record);
+
+    // Deduct fee from normal ADMIN wallet
+    if (req.user.role === "ADMIN" && currentAdmin) {
+      await admins.updateOne({ _id: objectId(req.user.id) }, { $inc: { wallet_balance: -48 } });
+    }
+
     res.json({ success: true, record: publicRecord(record) });
   } catch (error) {
     console.error(error);
@@ -217,6 +232,70 @@ app.get("/api/verify/:registrationNumber", async (req, res) => {
   delete safe.created_by;
   delete safe.updated_by;
   res.json({ verified: true, record: safe });
+});
+
+// Wallet Request Endpoints
+app.post("/api/wallet/request", auth, requireRole("ADMIN"), async (req, res) => {
+  try {
+    const amount = Number(req.body.amount);
+    const utr = String(req.body.utr || "").trim();
+    if (!amount || amount <= 0) return res.status(400).json({ message: "Valid amount is required" });
+    if (!utr) return res.status(400).json({ message: "Transaction UTR / Ref Number is required" });
+
+    const request = {
+      admin_id: objectId(req.user.id),
+      username: req.user.username,
+      amount,
+      utr,
+      status: "PENDING",
+      created_at: new Date()
+    };
+    await walletRequests.insertOne(request);
+    res.json({ success: true, message: "Wallet recharge request submitted successfully. Waiting for Super Admin approval." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Could not submit request" });
+  }
+});
+
+app.get("/api/wallet/requests", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  const list = await walletRequests.find({}).sort({ created_at: -1 }).toArray();
+  res.json(list.map(r => ({ ...r, id: String(r._id), admin_id: String(r.admin_id) })));
+});
+
+app.get("/api/wallet/my-requests", auth, requireRole("ADMIN"), async (req, res) => {
+  const list = await walletRequests.find({ admin_id: objectId(req.user.id) }).sort({ created_at: -1 }).toArray();
+  res.json(list.map(r => ({ ...r, id: String(r._id), admin_id: String(r.admin_id) })));
+});
+
+app.post("/api/wallet/approve/:id", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const id = objectId(req.params.id);
+    const reqData = await walletRequests.findOne({ _id: id, status: "PENDING" });
+    if (!reqData) return res.status(404).json({ message: "Pending request not found" });
+
+    // Update request status
+    await walletRequests.updateOne({ _id: id }, { $set: { status: "APPROVED", approved_at: new Date() } });
+    // Increase Admin balance
+    await admins.updateOne({ _id: reqData.admin_id }, { $set: { active: true }, $inc: { wallet_balance: reqData.amount } });
+
+    res.json({ success: true, message: "Wallet request approved successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Approval failed" });
+  }
+});
+
+app.post("/api/wallet/reject/:id", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const id = objectId(req.params.id);
+    const result = await walletRequests.updateOne({ _id: id, status: "PENDING" }, { $set: { status: "REJECTED", rejected_at: new Date() } });
+    if (!result.modifiedCount) return res.status(404).json({ message: "Pending request not found" });
+    res.json({ success: true, message: "Wallet request rejected." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Rejection failed" });
+  }
 });
 
 app.get("/verify-record/:registrationNumber", async (req, res) => {
@@ -433,6 +512,8 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
 
 app.get("*", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 
+let walletRequests;
+
 async function init() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI is missing. Add your MongoDB Atlas connection string to .env");
   const client = new MongoClient(MONGODB_URI);
@@ -440,6 +521,7 @@ async function init() {
   const db = client.db(DB_NAME);
   admins = db.collection("admins");
   records = db.collection("birth_records");
+  walletRequests = db.collection("wallet_requests");
   await admins.createIndex({ username: 1 }, { unique: true });
   await records.createIndex({ registration_number: 1 }, { unique: true });
   const username = process.env.SUPERADMIN_USER || "superadmin";
