@@ -248,121 +248,203 @@ app.get("/verify-record/:registrationNumber", async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validate Certificate | Civil Registration System</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #333; }
-        .header { background-color: #1e6091; color: white; padding: 14px 15px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 16px; }
-        .header-title { display: flex; align-items: center; gap: 8px; }
-        .header-title svg { fill: #4CAF50; width: 20px; height: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #333; }
 
-        .container { padding: 12px; }
-        .record-table { width: 100%; background: white; border-collapse: collapse; margin-top: 5px; }
-        .record-table td { padding: 12px 10px; border: 1px solid #e0e0e0; font-size: 15px; vertical-align: middle; line-height: 1.4; }
-        .label { width: 38%; color: #444; font-weight: 500; }
-        .value { color: #000; font-weight: normal; }
+        /* Fixed Header Bar style matching image */
+        .header { background-color: #1b75d1; color: white; padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; font-weight: 500; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-title { display: flex; align-items: center; gap: 10px; }
+        .header-title .tick-icon { background: #12a15a; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+        .header-refresh { font-size: 20px; font-weight: bold; opacity: 0.9; cursor: pointer; }
 
-        .footer-logos { text-align: center; margin-top: 25px; background: #ffffff; padding: 15px 0; border-top: 1px solid #eaeaea; }
-        .footer-logos .logo-row { display: flex; justify-content: center; gap: 15px; align-items: center; margin-bottom: 15px; }
-        .footer-logos img { height: 45px; object-fit: contain; }
-        .footer-logos .gov-box { background: #0a192f; color: white; padding: 8px 15px; font-size: 14px; font-weight: bold; border-radius: 3px; display: inline-block; margin-bottom: 12px; text-transform: uppercase; }
-        .footer-logos .gov-box span { color: #ff9933; }
-        .footer-logos .gov-box span.green { color: #128807; }
-        .footer-logos .india-portal { background: #eaeaea; padding: 10px; font-weight: bold; font-size: 16px; color: #111; display: inline-flex; align-items: center; justify-content: center; width: 220px; border: 1px solid #ccc; margin-bottom: 12px; }
-        .footer-logos .pm-india { background: #222; color: #fff; padding: 8px 20px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; border-radius: 2px; margin-bottom: 15px; }
-        .footer-logos .coop-banner { border: 1px dashed #e11d48; padding: 6px 12px; color: #b91c1c; font-size: 13px; font-weight: bold; display: inline-block; border-radius: 4px; }
+        /* Secondary Header banner with logos and tricolor bar */
+        .gov-banner { background: #ffffff; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid #1a5ca3; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .gov-banner::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, #ff9933 33%, #ffffff 33%, #ffffff 66%, #128807 66%); }
+        .gov-banner .left-logo { height: 42px; }
+        .gov-banner .center-logo { height: 38px; }
+        .gov-banner .right-icons { display: flex; align-items: center; gap: 12px; }
+        .gov-banner .moon-icon { font-size: 18px; color: #333; }
+        .gov-banner .login-btn { background: #5c7ca6; color: white; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; text-decoration: none; }
+        .gov-banner .menu-bars { font-size: 20px; color: #333; font-weight: bold; }
 
-        .info-links { background-color: #0d9488; color: white; padding: 25px 15px; text-align: center; font-size: 13px; line-height: 2; margin-top: 30px; }
-        .info-links a { color: white; text-decoration: none; margin: 0 4px; display: inline-block; }
-        .info-links .separator { margin: 0 4px; color: rgba(255,255,255,0.6); }
+        /* Main Details Card Box precisely centered with shadows */
+        .container { padding: 25px 15px; background: #ffffff; }
+        .card-wrapper { background: #ffffff; border-radius: 4px; border: 1px solid #e0e0e0; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 12px; margin: 0 auto; max-width: 600px; }
 
-        .bottom-blue { background-color: #0f172a; color: #94a3b8; padding: 25px 15px; text-align: center; font-size: 12px; line-height: 1.6; }
-        .bottom-blue .main-text { color: #f8fafc; font-weight: 500; font-size: 13px; margin-top: 10px; }
+        .record-table { width: 100%; border-collapse: collapse; }
+        .record-table td { padding: 14px 12px; border: 1px solid #e2e8f0; font-size: 14.5px; vertical-align: top; color: #2d3748; line-height: 1.5; }
+        .label { width: 32%; color: #4a5568; font-weight: normal; }
+        .value { color: #000000; font-weight: normal; }
+
+        /* Bottom section with exact background color matching image */
+        .bottom-section { background: linear-gradient(to bottom, #115e7a, #0b455c); color: #ffffff; padding: 30px 15px; text-align: center; }
+
+        /* Exact center logos layout stacked and matching the screenshot design */
+        .footer-logos { margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+
+        .footer-logos .datagov-box { color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: -0.5px; display: inline-flex; align-items: center; justify-content: center; font-family: sans-serif; }
+        .footer-logos .datagov-box span { background: #ffcc00; color: #000000; padding: 1px 6px; border-radius: 4px; margin-left: 2px; font-size: 24px; }
+        .footer-logos .datagov-sub { font-size: 10px; color: #cbd5e1; margin-top: -4px; font-weight: normal; opacity: 0.9; }
+
+        .footer-logos .india-gov-box { background: #ffffff; padding: 8px 25px; width: 180px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .footer-logos .india-gov-box span { font-weight: bold; font-size: 18px; color: #000; }
+        .footer-logos .india-gov-box span.orange { color: #ff9933; }
+        .footer-logos .india-gov-box span.green { color: #128807; }
+
+        .footer-logos .pm-india-box { background: #222222; color: #ffffff; padding: 6px 20px; font-size: 11px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #444; width: 185px; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .footer-logos .pm-india-box img { height: 16px; }
+
+        .footer-logos .generic-img-wrapper { background: #ffffff; padding: 6px; width: 220px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .footer-logos .generic-img-wrapper img { height: 36px; max-width: 100%; object-fit: contain; }
+
+        .footer-logos .coop-wrapper { background: #ffffff; padding: 8px 12px; width: 210px; text-align: center; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .footer-logos .coop-wrapper img { height: 35px; width: auto; display: block; margin: 0 auto 4px; }
+        .footer-logos .coop-wrapper .coop-title { color: #1e3a8a; font-size: 11px; font-weight: bold; line-height: 1.2; }
+        .footer-logos .coop-wrapper .coop-sub { color: #475569; font-size: 9px; margin-top: 1px; }
+
+        /* Links area */
+        .info-links { font-size: 13.5px; color: #ffffff; line-height: 2.2; margin-bottom: 25px; font-weight: normal; }
+        .info-links a { color: #ffffff; text-decoration: none; margin: 0 6px; opacity: 0.95; display: inline-block; }
+        .info-links span.pipe { color: rgba(255,255,255,0.4); margin: 0 2px; }
+
+        .last-updated { font-size: 13px; color: #e2e8f0; margin-bottom: 25px; font-weight: normal; opacity: 0.9; }
+
+        /* Developed by area */
+        .maintained-by { font-size: 13.5px; color: #ffffff; line-height: 1.6; margin-bottom: 25px; max-width: 500px; margin-left: auto; margin-right: auto; opacity: 0.95; }
+
+        /* Standardized Legal Timestamp Style at the very bottom */
+        .copyright-timestamp { font-size: 13px; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 15px; line-height: 1.5; opacity: 0.9; }
     </style>
 </head>
 <body>
+    <!-- Top Blue Header mimicking Application Navigation Bar -->
     <div class="header">
         <div class="header-title">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <div class="tick-icon">&#10003;</div>
             <span>Validate Certificate | Civil R...</span>
         </div>
-        <div style="cursor:pointer;" onclick="location.reload()">&#8635;</div>
+        <div class="header-refresh" onclick="location.reload()">&#8635;</div>
     </div>
 
+    <!-- Government Portal Brand Sub-Header with Indian Flag Gradient and Icons -->
+    <div class="gov-banner">
+        <img src="https://crsorgi.gov.in/web/images/logo.png" class="left-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg'">
+        <img src="https://amritmahotsav.nic.in/assets/images/logo.png" class="center-logo" onerror="this.style.display='none'">
+        <div class="right-icons">
+            <span class="moon-icon">&#9789;</span>
+            <a href="#" class="login-btn">&#8594;</a>
+            <span class="menu-bars">&#9776;</span>
+        </div>
+    </div>
+
+    <!-- White Card Wrapper with Details View Block -->
     <div class="container">
-        <table class="record-table">
-            <tr>
-                <td class="label">Registration Number</td>
-                <td class="value" style="font-weight:bold; color:#1e3a8a;">${record.registration_number}</td>
-            </tr>
-            <tr>
-                <td class="label">NAME</td>
-                <td class="value">${record.name}</td>
-            </tr>
-            <tr>
-                <td class="label">GENDER</td>
-                <td class="value">${record.sex || 'N/A'}</td>
-            </tr>
-            <tr>
-                <td class="label">DOB</td>
-                <td class="value">${formattedDOB}</td>
-            </tr>
-            <tr>
-                <td class="label">Name Of Mother</td>
-                <td class="value">${record.mother_name || 'N/A'}</td>
-            </tr>
-            <tr>
-                <td class="label">Name Of Father</td>
-                <td class="value">${record.father_name || 'N/A'}</td>
-            </tr>
-            <tr>
-                <td class="label">Place of Birth</td>
-                <td class="value">
-                    ${record.place_of_birth}, ${record.district || 'FIROZABAD'}, ${record.state || 'UTTAR PRADESH'}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Registration Date</td>
-                <td class="value">${formattedRegDate}</td>
-            </tr>
-            <tr>
-                <td class="label">Registration Unit Name</td>
-                <td class="value">NAGAR NIGAM ${record.district || 'FIROZABAD'}</td>
-            </tr>
-            <tr>
-                <td class="label">Registration Unit Code</td>
-                <td class="value">09457</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="footer-logos">
-        <div class="gov-box">data.<span>gov</span>.in<br><small style="font-size:9px; font-weight:normal; display:block; color:#ccc; text-transform:none;">Open Government Data (OGD) Platform India</small></div>
-        <br>
-        <div class="india-portal">india.<span style="color:#ff9933;">gov</span>.<span style="color:#128807;">in</span></div>
-        <br>
-        <div class="pm-india"><span style="font-size:14px;">🏛️</span> PM INDIA</div>
-        <br>
-        <div class="logo-row" style="margin-top:10px;">
-            <img src="https://upload.wikimedia.org/wikipedia/hi/thumb/c/c5/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png" alt="Digital India" style="height:35px;">
-            <img src="https://www.mygov.in/sites/default/files/mygov_logo_new.png" alt="MyGov" style="height:35px;">
-        </div>
-        <div class="coop-banner">
-            International Year of Cooperatives 2025<br>
-            <span style="font-size:11px; font-weight:normal; color:#555;">Cooperatives Build a Better World</span>
+        <div class="card-wrapper">
+            <table class="record-table">
+                <tr>
+                    <td class="label">Registration Number</td>
+                    <td class="value">${record.registration_number}</td>
+                </tr>
+                <tr>
+                    <td class="label">NAME</td>
+                    <td class="value">${record.name}</td>
+                </tr>
+                <tr>
+                    <td class="label">GENDER</td>
+                    <td class="value">${record.sex || 'Male'}</td>
+                </tr>
+                <tr>
+                    <td class="label">DOD</td>
+                    <td class="value">${formattedDOB}</td>
+                </tr>
+                <tr>
+                    <td class="label">Name Of Mother</td>
+                    <td class="value">${record.mother_name || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td class="label">Name Of Father</td>
+                    <td class="value">${record.father_name || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td class="label">Place of Death</td>
+                    <td class="value">
+                        LADPURA, NAGLA DUNGAR, FIROZABAD, FIROZABAD, UTTAR PRADESH, 283203 / <br>
+                        लदपुरा, NAGLA DUNGAR, FIROZABAD, FIROZABAD, UTTAR PRADESH, 283203
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Registration Date</td>
+                    <td class="value">${formattedRegDate}</td>
+                </tr>
+                <tr>
+                    <td class="label">Registration Unit Name</td>
+                    <td class="value">GRAMA PANCHAYAT NAGLA DUNGAR</td>
+                </tr>
+                <tr>
+                    <td class="label">Registration Unit Code</td>
+                    <td class="value">09457</td>
+                </tr>
+            </table>
         </div>
     </div>
 
-    <div class="info-links">
-        <a href="#">Website Policy</a><span class="separator">|</span><a href="#">Mobile App Privacy Policy</a><span class="separator">|</span><a href="#">Terms & Conditions</a><span class="separator">|</span><a href="#">Accessibility Statement</a><span class="separator">|</span><a href="#">Web Information Manager</a>
-        <br>
-        <a href="#">Feedback</a><span class="separator">|</span><a href="#">Sitemap</a><span class="separator">|</span><a href="#">Contact Us</a><span class="separator">|</span><a href="#">Vacancies</a><span class="separator">|</span><a href="#">Product & Services</a><span class="separator">|</span><a href="#">Pricing</a><span class="separator">|</span><a href="#">Cancellation Policy</a><span class="separator">|</span><a href="#">Grievance Management Policy</a>
-        <br><br>
-        Last Updated: 30-01-2024 12:16:17
-    </div>
+    <!-- Teal/Blue Gradient Bottom Area Matching Screenshots Exactly -->
+    <div class="bottom-section">
 
-    <div class="bottom-blue">
-        Website Developed & Maintained by Office of the Registrar General & Census Commissioner of India<br>
-        <div class="main-text">Ministry of Home Affairs</div>
-        <br>
-        <span style="font-size:11px; color:#64748b;">&copy; 2026 - The Registrar General & Census Commissioner of India - Sep 15, 2026, 12:33:49 PM</span>
+        <!-- Stacked Official Central Logos -->
+        <div class="footer-logos">
+            <div>
+                <div class="datagov-box">data.gov<span>in</span></div>
+                <div class="datagov-sub">Open Government Data (OGD) Platform India</div>
+            </div>
+
+            <div class="india-gov-box">
+                <span>india.<span class="orange">gov</span>.<span class="green">in</span></span>
+            </div>
+
+            <div class="pm-india-box">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem">
+                <span>PM INDIA</span>
+            </div>
+
+            <div class="generic-img-wrapper">
+                <img src="https://www.makeinindia.com/mfg_theme/images/logo.png" alt="Make In India">
+            </div>
+
+            <div class="generic-img-wrapper">
+                <img src="https://upload.wikimedia.org/wikipedia/hi/thumb/c/c5/Digital_India_logo.svg/1200px-Digital_India_logo.svg.png" alt="Digital India">
+            </div>
+
+            <div class="generic-img-wrapper">
+                <img src="https://www.mygov.in/sites/default/files/mygov_logo_new.png" alt="MyGov">
+            </div>
+
+            <div class="coop-wrapper">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/International_Year_of_Cooperatives_2012_logo.svg/1200px-International_Year_of_Cooperatives_2012_logo.svg.png" alt="Coop Logo" onerror="this.style.opacity='0.5'">
+                <div class="coop-title">International Year of Cooperatives 2025</div>
+                <div class="coop-sub">Cooperatives Build a Better World</div>
+            </div>
+        </div>
+
+        <!-- Links Area -->
+        <div class="info-links">
+            <a href="#">Website Policy</a><span class="pipe">|</span><a href="#">Mobile App Privacy Policy</a><span class="pipe">|</span><a href="#">Terms & Conditions</a><span class="pipe">|</span><a href="#">Accessibility Statement</a><span class="pipe">|</span><a href="#">Web Information Manager</a>
+            <br>
+            <a href="#">Feedback</a><span class="pipe">|</span><a href="#">Sitemap</a><span class="pipe">|</span><a href="#">Contact Us</a><span class="pipe">|</span><a href="#">Vacancies</a><span class="pipe">|</span><a href="#">Product & Services</a><span class="pipe">|</span><a href="#">Pricing</a><span class="pipe">|</span><a href="#">Cancellation Policy</a><span class="pipe">|</span><a href="#">Grievance Management Policy</a>
+        </div>
+
+        <!-- Hardcoded Static Dynamic Sync Date -->
+        <div class="last-updated">Last Updated: 30-01-2024 12:16:17</div>
+
+        <!-- Maintenance Ministry and Footer Copyright block -->
+        <div class="maintained-by">
+            Website Developed & Maintained by Office of the Registrar General & Census Commissioner of India
+            <br><br>
+            <strong style="font-size:15px; font-weight:bold;">Ministry of Home Affairs</strong>
+        </div>
+
+        <div class="copyright-timestamp">
+            &copy; 2026 - The Registrar General & Census Commissioner of India - Sep 15, 2026, 5:37:37 PM
+        </div>
     </div>
 </body>
 </html>`;
