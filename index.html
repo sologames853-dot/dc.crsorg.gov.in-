@@ -150,7 +150,20 @@ Create ID (Contact Admin)
 <div id="tabViewWallet" class="tab-content hidden">
   <div id="adminWalletPanel" class="card">
   <h2>Recharge Wallet Account</h2>
-  <p>Transfer recharge amount to Official UPI ID: <b style="color:#2563eb; font-size:16px;">mrid55638@naviaxis</b></p>
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e2e8f0; gap:20px;">
+    <div style="flex:1; min-width:250px;">
+      <p style="margin:0 0 10px 0; font-weight:600; color:#475569;">OFFICIAL PAYMENT DETAILS</p>
+      <div style="background:white; padding:12px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:15px;">
+        <label style="display:block; margin-bottom:4px;">UPI ID:</label>
+        <b style="color:#2563eb; font-size:18px; word-break:break-all;">mrid55638@naviaxis</b>
+      </div>
+      <p style="margin:0; font-size:13px; color:#64748b;">Please scan the QR code or use the UPI ID above to make your payment. Once completed, enter the 12-digit UTR/Transaction number below to request a wallet recharge.</p>
+    </div>
+    <div style="text-align:center; padding:10px; background:white; border-radius:12px; border:1px solid #cbd5e1; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=mrid55638@naviaxis%26pn=Birth%20Record%20System%26cu=INR" alt="Payment QR Code" style="width:150px; height:150px; display:block; margin:0 auto;">
+      <div style="font-size:12px; font-weight:bold; color:#1e293b; margin-top:8px; background:#f1f5f9; padding:4px; border-radius:4px;">SCAN & PAY ANY UPI APP</div>
+    </div>
+  </div>
   <div class="grid">
   <div><label>Recharge Amount (₹)</label><input id="rechargeAmount" type="number" placeholder="Enter amount paid"></div>
   <div><label>Transaction UTR / Ref No.</label><input id="rechargeUTR" placeholder="Enter 12 digit UTR number"></div>
