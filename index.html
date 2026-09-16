@@ -207,7 +207,11 @@ Create ID (Contact Admin)
   <div><label>Admin ID / Username</label><input id="newAdminUsername" placeholder="Example: admin01"></div>
   <div><label>Admin Secure Password</label><input id="newAdminPassword" type="password" placeholder="Minimum 8 characters"></div>
   </div>
-  <label>Admin Full Name</label><input id="newAdminName" placeholder="Admin display name">
+  <div class="grid">
+  <div><label>Admin Full Name</label><input id="newAdminName" placeholder="Admin display name"></div>
+  <div><label>Mobile Number</label><input id="newAdminMobile" placeholder="Enter 10 digit mobile number"></div>
+  </div>
+  <label>Email ID (Gmail)</label><input id="newAdminEmail" placeholder="Enter email address">
   <button onclick="createAdmin()">Create Secure Admin</button>
   </div>
 
@@ -398,11 +402,17 @@ async function createAdmin(){
 const username=document.getElementById("newAdminUsername").value.trim();
 const password=document.getElementById("newAdminPassword").value;
 const full_name=document.getElementById("newAdminName").value.trim();
+const mobile=document.getElementById("newAdminMobile").value.trim();
+const email=document.getElementById("newAdminEmail").value.trim();
 if(!username||!password){alert("Admin ID and password are required.");return;}
 try{
-const data=await api("/api/admins",{method:"POST",body:JSON.stringify({username,password,full_name})});
+const data=await api("/api/admins",{method:"POST",body:JSON.stringify({username,password,full_name,mobile,email})});
 alert("Admin created successfully.\n\nAdmin ID: "+data.admin.username);
-document.getElementById("newAdminUsername").value="";document.getElementById("newAdminPassword").value="";document.getElementById("newAdminName").value="";
+document.getElementById("newAdminUsername").value="";
+document.getElementById("newAdminPassword").value="";
+document.getElementById("newAdminName").value="";
+document.getElementById("newAdminMobile").value="";
+document.getElementById("newAdminEmail").value="";
 loadAdmins();
 }catch(error){alert(error.message);}
 }
@@ -414,7 +424,8 @@ const table=document.getElementById("adminTable");
 table.innerHTML="";
 admins.forEach(admin=>{
 const row=document.createElement("tr");
-row.innerHTML="<td><b>"+escapeHTML(admin.username)+"</b></td><td>"+escapeHTML(admin.full_name||"")+"</td><td><b style='color:#1e3a8a;'>₹"+(admin.wallet_balance||0)+"</b></td><td><span class=\"badge "+(admin.active?"active":"disabled")+"\">"+(admin.active?"ACTIVE":"DISABLED")+"</span></td><td>"+(admin.role==="ADMIN"?"<div style='display:flex; gap:5px; align-items:center; margin-bottom:5px;'><input type='number' style='width:90px; padding:6px; margin:0;' id='directWallet_"+admin.id+"' value='"+(admin.wallet_balance||0)+"'><button style='padding:6px 10px;' class='success' onclick='updateDirectWallet(\""+admin.id+"\")'>Set Balance</button></div><div style='display:flex; gap:5px; align-items:center;'><input type='text' style='width:90px; padding:6px; margin:0;' id='resetPwd_"+admin.id+"' placeholder='New Pwd'><button style='padding:6px 10px;' class='danger' onclick='resetPassword(\""+admin.id+"\")'>Reset Pwd</button><button class='secondary' style='padding:6px 10px;' onclick=\"toggleAdmin('"+admin.id+"',"+admin.active+")\">"+(admin.active?"Disable":"Enable")+"</button></div>":"<b>SUPER ADMIN</b>")+"</td>";
+const contactInfo = (admin.mobile ? "<br><small>📱 " + escapeHTML(admin.mobile) + "</small>" : "") + (admin.email ? "<br><small>📧 " + escapeHTML(admin.email) + "</small>" : "");
+row.innerHTML="<td><b>"+escapeHTML(admin.username)+"</b></td><td>"+escapeHTML(admin.full_name||"") + contactInfo + "</td><td><b style='color:#1e3a8a;'>₹"+(admin.wallet_balance||0)+"</b></td><td><span class=\"badge "+(admin.active?"active":"disabled")+"\">"+(admin.active?"ACTIVE":"DISABLED")+"</span></td><td>"+(admin.role==="ADMIN"?"<div style='display:flex; gap:5px; align-items:center; margin-bottom:5px;'><input type='number' style='width:90px; padding:6px; margin:0;' id='directWallet_"+admin.id+"' value='"+(admin.wallet_balance||0)+"'><button style='padding:6px 10px;' class='success' onclick='updateDirectWallet(\""+admin.id+"\")'>Set Balance</button></div><div style='display:flex; gap:5px; align-items:center;'><input type='text' style='width:90px; padding:6px; margin:0;' id='resetPwd_"+admin.id+"' placeholder='New Pwd'><button style='padding:6px 10px;' class='danger' onclick='resetPassword(\""+admin.id+"\")'>Reset Pwd</button><button class='secondary' style='padding:6px 10px;' onclick=\"toggleAdmin('"+admin.id+"',"+admin.active+")\">"+(admin.active?"Disable":"Enable")+"</button></div>":"<b>SUPER ADMIN</b>")+"</td>";
 table.appendChild(row);
 });
 }catch(error){alert(error.message);}

@@ -40,7 +40,7 @@ function startServer(port) {
 }
 
 function publicAdmin(admin) {
-  return { id: String(admin._id), username: admin.username, full_name: admin.full_name || "", role: admin.role, active: admin.active, wallet_balance: admin.wallet_balance || 0, created_at: admin.created_at };
+  return { id: String(admin._id), username: admin.username, full_name: admin.full_name || "", mobile: admin.mobile || "", email: admin.email || "", role: admin.role, active: admin.active, wallet_balance: admin.wallet_balance || 0, created_at: admin.created_at };
 }
 
 function publicRecord(record) {
@@ -106,10 +106,12 @@ app.post("/api/admins", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
     const username = String(req.body.username || "").trim();
     const password = String(req.body.password || "");
     const full_name = String(req.body.full_name || "").trim();
+    const mobile = String(req.body.mobile || "").trim();
+    const email = String(req.body.email || "").trim();
     if (!username || !password) return res.status(400).json({ message: "Admin ID and password are required" });
     if (username.length < 4) return res.status(400).json({ message: "Admin ID must contain at least 4 characters" });
     if (password.length < 8) return res.status(400).json({ message: "Password must contain at least 8 characters" });
-    const admin = { username, password_hash: await bcrypt.hash(password, 12), full_name, role: "ADMIN", active: true, wallet_balance: 0, created_at: new Date() };
+    const admin = { username, password_hash: await bcrypt.hash(password, 12), full_name, mobile, email, role: "ADMIN", active: true, wallet_balance: 0, created_at: new Date() };
     await admins.insertOne(admin);
     res.json({ success: true, admin: publicAdmin(admin) });
   } catch (error) {
