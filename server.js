@@ -144,6 +144,24 @@ app.patch("/api/admins/:id/wallet", auth, requireRole("SUPER_ADMIN"), async (req
   res.json({ success: true, admin: publicAdmin(admin) });
 });
 
+app.patch("/api/admins/:id/password", auth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const id = objectId(req.params.id);
+    if (!id) return res.status(404).json({ message: "Admin not found" });
+    const password = String(req.body.password || "");
+    if (password.length < 8) return res.status(400).json({ message: "New password must be at least 8 characters" });
+
+    const password_hash = await bcrypt.hash(password, 12);
+    const result = await admins.findOneAndUpdate({ _id: id, role: "ADMIN" }, { $set: { password_hash } }, { returnDocument: "after" });
+    const admin = result && result.value ? result.value : result;
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to reset password" });
+  }
+});
+
 app.get("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   let query = {};
   if (req.user.role === "ADMIN") {
