@@ -36,7 +36,7 @@ button.tab-btn.active-tab{background:#2563eb;color:white;box-shadow:0 2px 5px rg
 
 .navigation-bar{display:flex;gap:10px;margin-bottom:25px;flex-wrap:wrap;background:white;padding:12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.03);border:1px solid #e2e8f0;}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px;}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin-bottom:25px;}
 .stat{background:#fff;padding:18px;border-radius:10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.02);border:1px solid #e2e8f0;}
 .stat label{color:#64748b;font-size:12px;}
 .stat strong{display:block;font-size:26px;margin-top:4px;color:#1e293b;}
@@ -91,6 +91,7 @@ Create ID (Contact Admin)
 <div id="totalCollectionBox" class="stat hidden"><label>Total Approved Collection</label><strong id="totalCollection">₹0</strong></div>
 <div class="stat"><label>Your Created Records</label><strong id="totalRecords">0</strong></div>
 <div class="stat"><label>Male Records</label><strong id="maleRecords">0</strong></div>
+<div class="stat"><label>Female Records</label><strong id="femaleRecords">0</strong></div>
 <div class="stat"><label>System Health</label><strong style="color:#10b981;">ONLINE</strong></div>
 </div>
 
@@ -325,6 +326,7 @@ if(currentUser.role==="ADMIN"){
 }
 document.getElementById("totalRecords").textContent=records.length;
 document.getElementById("maleRecords").textContent=records.filter(r=>r.sex==="Male").length;
+document.getElementById("femaleRecords").textContent=records.filter(r=>r.sex==="Female").length;
 }
 
 function renderRecords(){
