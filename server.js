@@ -75,10 +75,34 @@ function objectId(value) {
   return ObjectId.isValid(value) ? new ObjectId(value) : null;
 }
 
-function registrationNumber() {
+async function generateRegistrationNumber() {
   const year = new Date().getFullYear();
-  const randomBlock = Math.floor(10000000 + Math.random() * 90000000);
-  return `B${year}${randomBlock}${String(Date.now()).slice(-7)}`;
+  const prefix = `B${year}09563530`;
+
+  try {
+    const lastRecord = await records.find({
+      registration_number: new RegExp(`^${prefix}`)
+    }).sort({ registration_number: -1 }).limit(1).toArray();
+
+    let nextSeq = 1;
+    if (lastRecord.length > 0) {
+      const lastNumStr = lastRecord[0].registration_number;
+      // Extract the numeric part after the prefix
+      const lastSeq = parseInt(lastNumStr.substring(prefix.length), 10);
+      if (!isNaN(lastSeq)) {
+        nextSeq = lastSeq + 1;
+      }
+    } else {
+      // If it's the first record of 2026, start from 71 as per user's preference
+      if (year === 2026) nextSeq = 71;
+    }
+
+    return `${prefix}${String(nextSeq).padStart(6, '0')}`;
+  } catch (error) {
+    console.error("Error generating registration number:", error);
+    // Fallback to random if DB fails
+    return `B${year}09563530${Math.floor(100000 + Math.random() * 900000)}`;
+  }
 }
 
 app.post("/api/admin/login", async (req, res) => {
@@ -189,6 +213,9 @@ app.post("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, 
 
     const name = String(req.body.name || "").trim();
     if (!name) return res.status(400).json({ message: "Name is required" });
+
+    const regNo = await generateRegistrationNumber();
+
     const record = {
       name,
       sex: String(req.body.sex || ""),
@@ -199,7 +226,7 @@ app.post("/api/records", auth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, 
       father_name: String(req.body.father_name || ""),
       father_aadhaar: String(req.body.father_aadhaar || ""),
       child_aadhaar: String(req.body.child_aadhaar || ""),
-      registration_number: registrationNumber(),
+      registration_number: regNo,
       registration_date: String(req.body.registration_date || ""),
       address: String(req.body.address || ""),
       permanent_address: String(req.body.permanent_address || ""),
