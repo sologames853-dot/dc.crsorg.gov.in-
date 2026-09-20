@@ -587,6 +587,23 @@ async function init() {
   walletRequests = db.collection("wallet_requests");
   await admins.createIndex({ username: 1 }, { unique: true });
   await records.createIndex({ registration_number: 1 }, { unique: true });
+
+  // One-time migration to re-sequence existing registration numbers
+  try {
+    const allRecords = await records.find({}).sort({ created_at: 1 }).toArray();
+    let seq = 71;
+    for (const rec of allRecords) {
+      const year = new Date(rec.created_at || new Date()).getFullYear();
+      const prefix = `B${year}09563530`;
+      const newRegNo = `${prefix}${String(seq).padStart(6, '0')}`;
+      await records.updateOne({ _id: rec._id }, { $set: { registration_number: newRegNo } });
+      seq++;
+    }
+    if (allRecords.length > 0) console.log(`Successfully updated ${allRecords.length} existing records to new sequential format.`);
+  } catch (migrateError) {
+    console.error("Migration failed:", migrateError.message);
+  }
+
   const username = process.env.SUPERADMIN_USER || "superadmin";
   const password = process.env.SUPERADMIN_PASS || "ChangeMe123!";
   const passwordHash = await bcrypt.hash(password, 12);
